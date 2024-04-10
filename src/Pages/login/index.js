@@ -49,22 +49,22 @@ const Login = () => {
             <p>Please enter email and password to login</p>
           </div>
           <div>
-          <Input
-  inputContainerStyle={{ padding: "15px 30px" }}
-  type="text"
-  placeholder="Email"
-  onChange={(e) => setEmail(e.target.value)}  // Update the state with email value
-  name="email"
-  label={"Email"}
-/>
             <Input
-  inputContainerStyle={{ padding: "15px 30px" }}
-  type="password"
-  placeholder="Password"
-  onChange={(e) => setPassword(e.target.value)}
-  name="password"  // Update the name to "password"
-  label={"Password"}  // Update the label to "Password"
-/>
+              inputContainerStyle={{ padding: "15px 30px" }}
+              type="text"
+              placeholder="Email"
+              onChange={(e) => setEmail(e.target.value)}  // Update the state with email value
+              name="email"
+              label={"Email"}
+            />
+            <Input
+              inputContainerStyle={{ padding: "15px 30px" }}
+              type="password"
+              placeholder="Password"
+              onChange={(e) => setPassword(e.target.value)}
+              name="password"  // Update the name to "password"
+              label={"Password"}  // Update the label to "Password"
+            />
             <div className='btn-container' onClick={(e) => handleLogin()}>
               <button className='btn-style'>Login</button>
             </div>

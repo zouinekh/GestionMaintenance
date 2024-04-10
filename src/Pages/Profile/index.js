@@ -12,6 +12,7 @@ import { headers } from "next.config";
 
 const Profile = (props) => {
     const [users, setUsers] = useState([{
+        "id": 1,
         "email": "vipan@gmail.com",
         "first_name": "ahmed",
         "last_name": "test",
@@ -39,7 +40,12 @@ const Profile = (props) => {
     // if (!storedToken) {
     //     window.location.href = '/login'
     // }
+    // const userConnected = localStorage.getItem('user')
+    // if (userConnected.role != 1) {
+    //     alert("this side is only for admin wait until other side got developed")
+    //     window.location.href = '/login'
 
+    // }
     const [modal, setModal] = useState(false);
     const [updateModal, setupdateModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState();
@@ -98,8 +104,7 @@ const Profile = (props) => {
     const CloseUpdateModalUi = () => {
         setupdateModal(!updateModal)
     }
-
-    function handleDeleteUser(email) {
+    function handleDeleteUser(id) {
         return (
             Swal.fire({
                 title: "Are you sure?",
@@ -111,7 +116,7 @@ const Profile = (props) => {
                 confirmButtonText: "Yes, delete it!"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    setUsers(users.filter(user => user.email !== email));
+                    setUsers(users.filter(user => user.id !== id));
                     Swal.fire({
                         title: "Deleted!",
                         text: "User has been deleted.",
@@ -139,6 +144,7 @@ const Profile = (props) => {
                     <table class="custom-table">
                         <thead>
                             <tr>
+                                <th scope="col">id</th>
                                 <th scope="col">Email</th>
                                 <th scope="col">Nom</th>
                                 <th scope="col">Prenom</th>
@@ -155,6 +161,7 @@ const Profile = (props) => {
                                     return (
                                         user.role != 1 ?
                                             <tr key={key} >
+                                                <td>{user.id}</td>
                                                 <td>{user.email}</td>
                                                 <td>{user.first_name}</td>
                                                 <td>{user.last_name}</td>

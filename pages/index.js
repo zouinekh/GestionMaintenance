@@ -1,3 +1,3 @@
-import dashboard from "./dashboard";
+import Login from "../src/Pages/login";
 
-export default dashboard;
+export default Login;
