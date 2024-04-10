@@ -1,0 +1,418 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap");
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: "Quicksand", sans-serif;
+  background: rgb(236, 237, 250) !important;
+  font-weight: 400;
+  font-size: 14px;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.mr-5 {
+  margin-right: 5px;
+}
+.ml-5 {
+  margin-left: 5px;
+}
+.s-10 {
+  font-size: 10px;
+}
+.s-12 {
+  font-size: 12px;
+}
+.s-14 {
+  font-size: 14px;
+}
+.s-16 {
+  font-size: 16px;
+}
+.tc-grey {
+  color: grey;
+}
+
+.t-center {
+  text-align: center;
+}
+.flex {
+  display: flex;
+}
+.justify-center {
+  justify-content: center;
+}
+.align-center {
+  align-items: center;
+}
+.justify-sb {
+  justify-content: space-between;
+}
+
+ul li {
+  list-style: none;
+}
+
+.content {
+  width: calc(100% - 300px);
+  position: relative;
+  left: 300px;
+}
+
+.link {
+  color: #000;
+}
+
+.link:hover {
+  font-weight: 500;
+}
+
+@media screen and (max-width: 360px) {
+  .content {
+    width: 100%;
+    left: 0;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .content {
+    width: 100%;
+    left: 0;
+  }
+}
+
+/* @media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    color: white;
+    background: black;
+  }
+} */
+.table-container {
+  overflow-x: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+}
+
+.custom-table {
+  width: 100%;
+  font-size: 0.875rem;
+  text-align: left;
+  color: #657786;
+  border-collapse: collapse;
+}
+
+.custom-table thead {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  background-color: #f8f9fa;
+  color: #333;
+}
+
+.custom-table th,
+.custom-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.custom-table th {
+  font-weight: 500;
+}
+
+.custom-table tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.custom-table tbody tr:nth-child(odd) {
+  background-color: #fff;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #f1f3f4;
+}
+
+.custom-table td a {
+  font-weight: 500;
+  color: #1a0dab;
+  text-decoration: none;
+}
+
+.custom-table td a:hover {
+  text-decoration: underline;
+}
+.modal-bg {
+  position: fixed;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  left: 0;
+  top: 0;
+}
+
+.modal-container {
+  min-width: 600px;
+  background: #fff;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 5px;
+}
+
+.close-btn {
+  width: 40px;
+  height: 40px;
+  background: #eee;
+  border-radius: 5px;
+  color: #000;
+  margin: 20px;
+  outline: none;
+  border: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  cursor: pointer;
+}
+
+.modal-heading {
+  font-size: 20px;
+  padding: 20px;
+  margin-top: 10px;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  background: #eee;
+  border-radius: 0 0 5px 5px;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.footer-container {
+  display: flex;
+}
+
+@media screen and (max-width: 768px) {
+  .modal-container {
+    min-width: 95%;
+  }
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #fff;
+  border-radius: 20px;
+  position: relative;
+}
+
+.title {
+  font-size: 28px;
+  color: royalblue;
+  font-weight: 600;
+  letter-spacing: -1px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-left: 30px;
+}
+
+.title::before,
+.title::after {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  left: 0px;
+  background-color: royalblue;
+}
+
+.title::before {
+  width: 18px;
+  height: 18px;
+  background-color: royalblue;
+}
+
+.title::after {
+  width: 18px;
+  height: 18px;
+  animation: pulse 1s linear infinite;
+}
+
+.message,
+.signin {
+  color: rgba(88, 87, 87, 0.822);
+  font-size: 14px;
+}
+
+.signin {
+  text-align: center;
+}
+
+.signin a {
+  color: royalblue;
+}
+
+.signin a:hover {
+  text-decoration: underline royalblue;
+}
+
+.flex {
+  display: flex;
+  width: 100%;
+  gap: 30px;
+}
+
+.form label {
+  position: relative;
+}
+
+.form label .input {
+  width: 100%;
+  padding: 10px 10px 20px 10px;
+  outline: 0;
+  border: 1px solid rgba(105, 105, 105, 0.397);
+  border-radius: 10px;
+}
+
+.form label .input + span {
+  position: absolute;
+  left: 10px;
+  top: 15px;
+  color: grey;
+  font-size: 0.9em;
+  cursor: text;
+  transition: 0.3s ease;
+}
+
+.form label .input:placeholder-shown + span {
+  top: 15px;
+  font-size: 0.9em;
+}
+
+.form label .input:focus + span,
+.form label .input:valid + span {
+  top: 30px;
+  font-size: 0.7em;
+  font-weight: 600;
+}
+
+.form label .input:valid + span {
+  color: grey;
+}
+
+.submit {
+  border: none;
+  outline: none;
+  background-color: royalblue;
+  padding: 10px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 16px;
+  transform: 0.3s ease;
+}
+
+.submit:hover {
+  background-color: rgb(56, 90, 194);
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(0.9);
+    opacity: 1;
+  }
+
+  to {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+/* Style the dropdown button */
+.dropbtn {
+  margin-top: 7px;
+  margin-bottom: 2px;
+
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  color: grey;
+}
+
+/* Style the dropdown content (hidden by default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 100%;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+/* Style options inside the dropdown */
+.dropbtn option {
+  padding: 8px;
+}
+
+/* Show the dropdown menu on click */
+.dropdown:focus-within .dropdown-content {
+  display: block;
+}
+
+/* Change the appearance of the dropdown button when an option is selected */
+.dropbtn:focus {
+  outline: none;
+  border-color: #000;
+}
+
+/* Change the background color of the dropdown content on hover */
+.dropdown-content option:hover {
+  background-color: #f1f1f1;
+}
+.btn-container {
+  padding: 15px 30px;
+}
+.btn-style {
+  width: 100%;
+  height: 40px;
+  background: #000;
+  border-radius: 5px;
+  color: #fff;
+  outline: none;
+  border: none;
+  letter-spacing: 1px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+}
