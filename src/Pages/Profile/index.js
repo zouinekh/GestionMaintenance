@@ -11,40 +11,57 @@ import { baseUrl } from "utils/baseUrl";
 import { headers } from "next.config";
 
 const Profile = (props) => {
-    const [users, setUsers] = useState([{
-        "id": 1,
-        "email": "vipan@gmail.com",
-        "first_name": "ahmed",
-        "last_name": "test",
-        "password": "pbkdf2_sha256$260000$PHqEzke3ANQhUTd5t9u3mo$VFEHte+CLQT+8rjdZg3/hFNZUkEg20dIqmVkti2VVXs=",
-        "username": "vipan",
-        "role": 2
-    },]);
+    const storedToken = localStorage.getItem('token');
+    const [users, setUsers] = useState([{}]);
+    const [paginationInfo, setPaginationInfo] = useState({});
 
-    // async function getUsers() {
-    //     try {
-    //         const response = await axios.get('auth/users/', {
-    //             headers: {
-    //                 Authorization: `Bearer ${storedToken}`
-    //             }
-    //         });
-    //         setUsers(response.data);
-    //     } catch (error) {
-    //         console.error('Error fetching users:', error);
-    //     }
-    // }
-    // useEffect(() => {
-    //     getUsers();
-    // }, []);
-    // const storedToken = localStorage.getItem('token');
+    async function getUsers(pageNumber = 1, pageSize = 15) {
+        try {
+            const response = await axios.get(`${baseUrl}/auth/users/`, {
+                headers: {
+                    Authorization: `Bearer ${storedToken}`
+                },
+                params: {
+                    page: pageNumber,
+                    page_size: pageSize
+                }
+            });
+            console.log(response.data);
+            setUsers(response.data.results);
+            setPaginationInfo(response.data); // Assuming your API returns paginated results in a 'results' key
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+    }    
+    useEffect(() => {
+        getUsers();
+    }, []);
+
+    const handlePageChange = (pageNumber) => {
+        getUsers(pageNumber);
+    };
+
+    const renderPaginationButtons = () => {
+        const { previous, next } = paginationInfo;
+        return (
+            <div>
+                {previous && (
+                    <button onClick={() => handlePageChange(previous.page)}>Previous</button>
+                )}
+                {next && (
+                    <button onClick={() => handlePageChange(next.page)}>Next</button>
+                )}
+            </div>
+        );
+    };
+    
     // if (!storedToken) {
     //     window.location.href = '/login'
     // }
     // const userConnected = localStorage.getItem('user')
     // if (userConnected.role != 1) {
     //     alert("this side is only for admin wait until other side got developed")
-    //     window.location.href = '/login'
-
+    //     window.location.href = '/log'
     // }
     const [modal, setModal] = useState(false);
     const [updateModal, setupdateModal] = useState(false);
@@ -67,37 +84,60 @@ const Profile = (props) => {
 
     const onSubmit = data => {
         console.log(data)
-        if (data.password != data.confirmPassword) {
-            setconfirmMdpError(true)
-        } else if (selectedValue == "") {
-            setRoleError(true)
-            alert("Vous devez selectionner un role pour l'utilisateur");
+        if (data.password !== data.confirmPassword) {
+            setconfirmMdpError(true);
+        } else if (selectedValue === "") {
+            setRoleError(true);
+            alert("Vous devez sélectionner un rôle pour l'utilisateur");
         } else {
-            console.log(selectedValue)
-            console.log(data)
-            axios.post(`${baseUrl}/api/addUser`,
-                { username: data.email, email: data.email, password: data.password, first_name: data.prenom, last_name: data.nom, role: selectedValue },
-                {
-                    headers: {
-                        Authorization: `Bearer ${storedToken}`
-                    }
+            const token = localStorage.getItem('token');
+            console.log(selectedValue);
+            console.log(data);
+            axios.post(`${baseUrl}/auth/adduser/`, {
+                username: data.email,
+                email: data.email,
+                password: data.password,
+                first_name: data.prenom,
+                last_name: data.nom,
+                role: selectedValue
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
                 }
-
-            ).then(() => {
+            }).then(response => {
+                // Handle success response
                 Swal.fire({
                     icon: 'success',
                     title: 'User added',
+                    text: response.data.message, // Display the message from the backend
                     showConfirmButton: false,
                     timer: 1500
                 });
-                handleClose()
-            }
-            ).catch(() => {
-                alert("something goes wrong please try again later")
-            })
+                handleClose();
+            }).catch(error => {
+                // Handle error response
+                if (error.response) {
+                    // The request was made and the server responded with a status code that falls out of the range of 2xx
+                    if (error.response.status === 401) {
+                        // Handle 401 Unauthorized error
+                        const errorMessage = error.response.data.detail || "Unauthorized access";
+                        alert(errorMessage);
+                    } else if (error.response.status === 400) {
+                        // Handle other error responses
+                        alert(error.response.data.message || " user with this email already exists.");
+                    }
+                    else if (error.response.status === 500) {
+                        // Handle other error responses
+                        alert(error.response.data.message || " Server Error.");
+                    }
+                } else {
+                    // The request was made but no response was received
+                    alert("Something went wrong. Please try again later.");
+                }
+            });
         }
-
     };
+    
     const handleSubmitUpdateModal = data => {
         console.log(data)
     }
@@ -126,6 +166,7 @@ const Profile = (props) => {
             })
         )
     }
+    
     return (
         <>
             {/* <HeaderSection
@@ -139,6 +180,7 @@ const Profile = (props) => {
                         label="Ajouter un utilisateur"
                         onClick={openModal}
                     />
+                    {renderPaginationButtons()}
                 </div>
                 <div class="table-container">
                     <table class="custom-table">

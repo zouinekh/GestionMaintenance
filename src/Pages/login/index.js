@@ -28,7 +28,15 @@ const Login = () => {
         }
       })
       .catch(error => {
-        console.error("Login failed", error);
+        if (error.response && error.response.data) {
+          // Retrieve the message from the backend response
+          const errorMessage = error.response.data.messages[0].message;
+          // Handle the error message, for example, display it in an alert
+          alert(errorMessage);
+      } else {
+          // Handle other types of errors
+          alert("Something went wrong. Please try again later.");
+      }
       });
 
   }
