@@ -11,29 +11,38 @@ import { baseUrl } from "utils/baseUrl";
 import { headers } from "next.config";
 
 const Profile = (props) => {
-    const storedToken = localStorage.getItem('token');
     const [users, setUsers] = useState([{}]);
-    const [paginationInfo, setPaginationInfo] = useState({});
 
-    async function getUsers(pageNumber = 1, pageSize = 15) {
+    async function getUsers() {
         try {
+            const token = localStorage.getItem('token');
+            console.log(token);
             const response = await axios.get(`${baseUrl}/auth/users/`, {
                 headers: {
-                    Authorization: `Bearer ${storedToken}`
-                },
-                params: {
-                    page: pageNumber,
-                    page_size: pageSize
+                    Authorization: `Bearer ${token}`
                 }
             });
             console.log(response.data);
-            setUsers(response.data.results);
-            setPaginationInfo(response.data); // Assuming your API returns paginated results in a 'results' key
+            const activatedUsers = response.data.filter(user => user.is_active === true);
+            console.log(activatedUsers);
+            setUsers(activatedUsers);
         } catch (error) {
             console.error('Error fetching users:', error);
         }
-    }    
+    }
     useEffect(() => {
+        const storedToken = localStorage.getItem('token');
+        if (!storedToken) {
+            window.location.href = '/login'
+        }
+        const userConnectedString = localStorage.getItem('user');
+        const userConnected = JSON.parse(userConnectedString);
+        console.log(userConnected.role);
+        if (userConnected.role != 1) {
+            alert("this side is only for admin wait until other side got developed")
+            window.location.href = '/login'
+
+        }
         getUsers();
     }, []);
 
@@ -41,20 +50,7 @@ const Profile = (props) => {
         getUsers(pageNumber);
     };
 
-    const renderPaginationButtons = () => {
-        const { previous, next } = paginationInfo;
-        return (
-            <div>
-                {previous && (
-                    <button onClick={() => handlePageChange(previous.page)}>Previous</button>
-                )}
-                {next && (
-                    <button onClick={() => handlePageChange(next.page)}>Next</button>
-                )}
-            </div>
-        );
-    };
-    
+
     // if (!storedToken) {
     //     window.location.href = '/login'
     // }
@@ -137,36 +133,120 @@ const Profile = (props) => {
             });
         }
     };
+
+    const handleSubmitUpdateModal = (data) => {
+        const token = localStorage.getItem('token');
+        const updatedUserData = {
+            email: data.email || selectedUser.email,
+            first_name: data.prenom || selectedUser.first_name,
+            last_name: data.nom || selectedUser.last_name,
+            password: data.password,
+            confirmPassword: data.confirmPassword,
+            role: selectedValue || selectedUser.role
+        };
     
-    const handleSubmitUpdateModal = data => {
-        console.log(data)
-    }
+        axios.put(`${baseUrl}/auth/update-user/${selectedUser.id}/`, updatedUserData, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        .then(response => {
+            // Handle success response
+            Swal.fire({
+                icon: 'success',
+                title: 'User updated',
+                text: response.data.message, // Display the message from the backend
+                showConfirmButton: false,
+                timer: 1500
+            });
+            // Close the update modal
+            setupdateModal(false);
+            // Refresh the user list
+            getUsers();
+        })
+        .catch(error => {
+            // Handle error response
+            if (error.response) {
+                // The request was made and the server responded with a status code that falls out of the range of 2xx
+                if (error.response.status === 401) {
+                    // Handle 401 Unauthorized error
+                    const errorMessage = error.response.data.detail || "Unauthorized access";
+                    alert(errorMessage);
+                } else if (error.response.status === 400) {
+                    // Handle other error responses
+                    alert(error.response.data.message || " user with this email already exists.");
+                }
+                else if (error.response.status === 500) {
+                    // Handle other error responses
+                    alert(error.response.data.message || " Server Error.");
+                }
+            } else {
+                // The request was made but no response was received
+                alert("Something went wrong. Please try again later.");
+            }
+        });
+    };
+    
     const CloseUpdateModalUi = () => {
         setupdateModal(!updateModal)
     }
     function handleDeleteUser(id) {
+        const token = localStorage.getItem('token'); // Define the token variable here
         return (
-            Swal.fire({
-                title: "Are you sure?",
-                text: "You won't be able to revert this!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Yes, delete it!"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    setUsers(users.filter(user => user.id !== id));
+            axios.delete(`${baseUrl}/auth/deactivate-user/${id}/`, // Pass the user ID as part of the URL path
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    // Handle success response
                     Swal.fire({
-                        title: "Deleted!",
-                        text: "User has been deleted.",
-                        icon: "success"
+                        title: "Es-tu sûr?",
+                        text: "Vous ne pourrez pas revenir en arrière!",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: "Oui, effacer-le!"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            setUsers(users.filter(user => user.id !== id));
+                            Swal.fire({
+                                title: "effacer!",
+                                text: "L'utilisateur a été effacé.",
+                                icon: "success"
+                            });
+                        }
                     });
+                })
+                .catch(function (error) {
+                    // Handle error response
+                    if (error.response) {
+                        // The request was made and the server responded with a status code that falls out of the range of 2xx
+                        if (error.response.status === 401) {
+                            // Handle 401 Unauthorized error
+                            const errorMessage = error.response.data.detail || "Unauthorized access";
+                            alert(errorMessage);
+                        } else if (error.response.status === 400) {
+                            // Handle other error responses
+                            alert(error.response.data.message || " user with this email already exists.");
+                        } else {
+                            // Handle other error responses
+                            console.log(error.response);
+                            alert(error.response.data.message || " Server Error.");
+                        }
+                    } else if (error.request) {
+                        // The request was made but no response was received
+                        alert("Something went wrong. Please try again later.");
+                    }
                 }
-            })
+                )
         )
     }
     
+    
+
     return (
         <>
             {/* <HeaderSection
@@ -180,7 +260,6 @@ const Profile = (props) => {
                         label="Ajouter un utilisateur"
                         onClick={openModal}
                     />
-                    {renderPaginationButtons()}
                 </div>
                 <div class="table-container">
                     <table class="custom-table">
@@ -212,7 +291,7 @@ const Profile = (props) => {
                                                     setSelectedUser(user)
                                                     setupdateModal(true)
                                                 }}>Edit</td>
-                                                <td onClick={(e) => { handleDeleteUser(user.email) }}><a href="#" style={{ color: "red" }}>Supprimer</a></td>
+                                                <td onClick={(e) => { handleDeleteUser(user.id) }}><a href="#" style={{ color: "red" }}>Effacer</a></td>
                                             </tr> : <></>)
                                 })
                             }
