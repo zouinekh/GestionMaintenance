@@ -45,29 +45,41 @@ function ligne() {
             });
 
             // If the Ligne creation is successful, create the related LignesAssignto object
-            if (response.status === 201) {
+            if (response.status === 201 || response.status === 200) {
                 const ligneId = response.data.id;
+                setLignes([...lignes, newLigne]);
                 const assigneId = data.assigne; // Assuming assigneId is the ID of the technician
 
                 if (assigneId) {
-                    // Send the request to create a new LignesAssignto object
-                    await axios.post(`${baseUrl}/ligne-assignments/create/`, {
-                        "ligne": ligneId,
-                        "technician": assigneId,
-                        "status": "pending"
-                    }, {
-                        headers: {
-                            Authorization: `Bearer ${storedToken}`
-                        }
-                    });
+                    try{
+                        await axios.post(`${baseUrl}/lignesAssignTo/create/`, {
+                            "ligne": ligneId,
+                            "technician": assigneId,
+                            "status": "pending"
+                        }, {
+                            headers: {
+                                Authorization: `Bearer ${storedToken}`
+                            }
+                        });
+                    }
+                    catch(error){
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: "Assign to technicien failed ",
+                        });
+                    }
                 }
                 handleClose(); // Close the form or perform any other necessary action
-            } else {
-                // Handle unsuccessful response if needed
             }
         } catch (error) {
             // Handle errors
             console.error('Error creating Ligne:', error);
+            Swal.fire({
+                icon: "error",
+                title: "Error creating Ligne...",
+                text: error,
+            });
         }
     };
     async function updateLigne(data) {
@@ -75,11 +87,38 @@ function ligne() {
             "title": data.titre,
             "daterealisation": data.dateRealisation,
         }
-        axios.put(`${baseUrl}/lignes/${selectedLigne.id}`, newLinge, {
-            headers: {
-                Authorization: `Bearer ${storedToken}`
+        try {
+            const response = await axios.put(`${baseUrl}/lignes/${selectedLigne.id}`, newLinge, {
+                headers: {
+                    Authorization: `Bearer ${storedToken}`
+                }
+            });
+            if (response.status === 200) {
+                // Update lignes state with the updated ligne
+                setLignes(prevLignes => {
+                    const updatedLignes = prevLignes.map(ligne => {
+                        if (ligne.id === selectedLigne.id) {
+                            return {
+                                ...ligne,
+                                title: newLinge.title,
+                                daterealisation: newLinge.daterealisation
+                            };
+                        }
+                        return ligne;
+                    });
+                    return updatedLignes;
+                });
+                setUpdateModal(false);
+                setSelectedLigne({});
             }
-        }).then((res) => { setUpdateModal(false) })
+        } catch (error) {
+            console.error('Error updating Ligne:', error);
+            Swal.fire({
+                icon: "error",
+                title: "Error updating Ligne...",
+                text: error,
+            });
+        }
     }
     const onUpdateSubmit = async (data) => {
         axios.get(`${baseUrl}/lignesAssignTo/get/${selectedLigne.id}`,
@@ -105,7 +144,6 @@ function ligne() {
             })
     }
     const handleClose = () => {
-        //alert('closing');
         setModal(false);
     };
     const openModal = () => {
@@ -146,6 +184,7 @@ function ligne() {
             console.error('Error fetching lignes:', error);
         }
     };
+    
     function updateAsignementToUser(ligne) {
         const userOptions = {};
         users.forEach((user) => {
@@ -207,9 +246,44 @@ function ligne() {
             )
     }
     const handleDeletLigne = async (id) => {
-        axios.get(`${baseUrl}/lignesAssignTo/get/${id}`,
-            { headers: { Authorization: `Bearer ${storedToken}` } })
-            .then((res) => {
+        try{
+            const response = await axios.get(
+                `${baseUrl}/lignesAssignTo/get/${id}`,
+                { headers: { Authorization: `Bearer ${storedToken}` } }
+            );
+
+            if (response.status === 404) {
+
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, delete it!",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        axios
+                            .delete(`${baseUrl}/lignes/${id}`, {
+                                headers: { Authorization: `Bearer ${storedToken}` },
+                            })
+                            .then(() => {
+                                setLignes(lignes.filter((ligne) => ligne.id !== id));
+                                Swal.fire({
+                                    title: "Deleted!",
+                                    text: "Ligne has been deleted.",
+                                    icon: "success",
+                                });
+                            });
+                    }
+                });
+            }
+            else if (response.status !== 404){
+
+                axios.get(`${baseUrl}/lignesAssignTo/get/${id}`,
+                { headers: { Authorization: `Bearer ${storedToken}` } })
+                .then((res) => {
                 if (res.data.status == "pending") {
                     Swal.fire({
                         title: "Are you sure?",
@@ -242,7 +316,36 @@ function ligne() {
             );
                     })
                 }
+                else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: "Ligne already on progress or done you can't update it ",
+                    });
+                }
             })
+
+            }
+            else
+            {
+
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Ligne already on progress or done you can't update it ",
+                });
+
+            }
+
+        } catch(err){
+            console.error('Error deleting Ligne:', err);
+            Swal.fire({
+                icon: "error",
+                title: "Error deleting Ligne...",
+                text: err,
+            });
+        }
+        
     }
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -268,6 +371,15 @@ function ligne() {
                 </div>
                 <div class="table-container">
                     <table class="custom-table">
+                    <colgroup>
+                            <col style={{ width: "5%" }} /> {/* ID */}
+                            <col style={{ width: "15%" }} /> {/* Titre de ligne */}
+                            <col style={{ width: "10%" }} /> {/* Date de Realisation prev */}
+                            <col style={{ width: "10%" }} /> {/* Date de creation */}
+                            <col style={{ width: "10%" }} /> {/* Edit */}
+                            <col style={{ width: "20%" }} /> {/* Assigné à */}
+                            <col style={{ width: "10%" }} /> {/* Supprimer */}
+                        </colgroup>
                         <thead>
                             <tr>
                                 <th scope="col">ID</th>
@@ -288,7 +400,7 @@ function ligne() {
                                             <td>{ligne.id}</td>
                                             <td>{ligne.title}</td>
                                             <td>{ligne.daterealisation}</td>
-                                            <td>{ligne.datecreation}</td>
+                                            <td>{new Date(ligne.daterealisation).toLocaleString()}</td>
                                             <td onClick={(e) => {
                                                 setSelectedLigne(ligne)
                                                 setUpdateModal(true)

@@ -137,12 +137,13 @@ const Profile = (props) => {
     const handleSubmitUpdateModal = (data) => {
         const token = localStorage.getItem('token');
         const updatedUserData = {
+            username: data.email || selectedUser.email,
             email: data.email || selectedUser.email,
-            first_name: data.prenom || selectedUser.first_name,
-            last_name: data.nom || selectedUser.last_name,
+            first_name: data.first_name || selectedUser.first_name,
+            last_name: data.last_name || selectedUser.last_name,
             password: data.password,
             confirmPassword: data.confirmPassword,
-            role: selectedValue || selectedUser.role
+            role: selectedValue  || selectedUser.role
         };
     
         axios.put(`${baseUrl}/auth/update-user/${selectedUser.id}/`, updatedUserData, {
@@ -193,7 +194,7 @@ const Profile = (props) => {
     function handleDeleteUser(id) {
         const token = localStorage.getItem('token'); // Define the token variable here
         return (
-            axios.delete(`${baseUrl}/auth/deactivate-user/${id}/`, // Pass the user ID as part of the URL path
+            axios.delete(`${baseUrl}/auth/delete-user/${id}/`, // Pass the user ID as part of the URL path
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
