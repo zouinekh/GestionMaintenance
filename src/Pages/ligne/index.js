@@ -252,7 +252,7 @@ function ligne() {
                 { headers: { Authorization: `Bearer ${storedToken}` } }
             );
 
-            if (response.status === 404) {
+            if (response.status === 200 && response.data.message === "Resource not found") {
 
                 Swal.fire({
                     title: "Are you sure?",
@@ -279,7 +279,7 @@ function ligne() {
                     }
                 });
             }
-            else if (response.status !== 404){
+            else if (response.status === 200 && response.data.message !== "Resource not found"){
 
                 axios.get(`${baseUrl}/lignesAssignTo/get/${id}`,
                 { headers: { Authorization: `Bearer ${storedToken}` } })
