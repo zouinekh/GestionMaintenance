@@ -5,11 +5,32 @@ import routes from "../../routes";
 import { useRouter } from "next/router";
 import { TbLogout } from "react-icons/tb";
 import { BiChevronLeft } from "react-icons/bi";
+import { useEffect, useState } from "react";
+import { IoHomeOutline } from "react-icons/io5";
+import { BsSpeedometer2 } from "react-icons/bs";
 
 const SidebarNavigation = ({
   sidebarMenuActive,
   toggleSidebarMenu
 }) => {
+
+  const [role, setRole] = useState();
+  const techniciensRoutes = [{
+    to: '/',
+    name: 'Home',
+    Icon: IoHomeOutline
+  },
+  {
+    to: '/lignesAssigned',
+    name: 'ligne',
+    Icon: BsSpeedometer2
+  },]
+  useEffect(() => {
+    const user = localStorage.getItem("user")
+    console.log()
+    // setRole(JSON.parse(user).role)
+    setRole(2)
+  }, []);
   const router = useRouter();
 
   console.log({ router });
@@ -24,14 +45,26 @@ const SidebarNavigation = ({
         <div className={styles['logo-explain']}>Admin Dashboard</div>
       </div>
       <ul className={styles["sidebar-container"]}>
-        {routes.map((page, index) => (
-          <li key={index} className={`${styles["sidebar-menu-item"]} ${router.route === page.to ? styles['active'] : ''}`}>
-            <Link href={page.to}>
-              <page.Icon />
-              <span>{page.name}</span>
-            </Link>
-          </li>
-        ))}
+        {role == 1 ?
+
+          routes.map((page, index) => (
+            <li key={index} className={`${styles["sidebar-menu-item"]} ${router.route === page.to ? styles['active'] : ''}`}>
+              <Link href={page.to}>
+                <page.Icon />
+                <span>{page.name}</span>
+              </Link>
+            </li>
+          ))
+          :
+          techniciensRoutes.map((page, index) => (
+            <li key={index} className={`${styles["sidebar-menu-item"]} ${router.route === page.to ? styles['active'] : ''}`}>
+              <Link href={page.to}>
+                <page.Icon />
+                <span>{page.name}</span>
+              </Link>
+            </li>
+          ))
+        }
       </ul>
 
       <ul className={styles["sidebar-footer"]}>

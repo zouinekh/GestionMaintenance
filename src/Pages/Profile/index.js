@@ -143,84 +143,88 @@ const Profile = (props) => {
             last_name: data.last_name || selectedUser.last_name,
             password: data.password,
             confirmPassword: data.confirmPassword,
-            role: selectedValue  || selectedUser.role
+            role: selectedValue || selectedUser.role
         };
-    
+
         axios.put(`${baseUrl}/auth/update-user/${selectedUser.id}/`, updatedUserData, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         })
-        .then(response => {
-            // Handle success response
-            Swal.fire({
-                icon: 'success',
-                title: 'User updated',
-                text: response.data.message, // Display the message from the backend
-                showConfirmButton: false,
-                timer: 1500
+            .then(response => {
+                // Handle success response
+                Swal.fire({
+                    icon: 'success',
+                    title: 'User updated',
+                    text: response.data.message, // Display the message from the backend
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+                // Close the update modal
+                setupdateModal(false);
+                // Refresh the user list
+                getUsers();
+            })
+            .catch(error => {
+                // Handle error response
+                if (error.response) {
+                    // The request was made and the server responded with a status code that falls out of the range of 2xx
+                    if (error.response.status === 401) {
+                        // Handle 401 Unauthorized error
+                        const errorMessage = error.response.data.detail || "Unauthorized access";
+                        alert(errorMessage);
+                    } else if (error.response.status === 400) {
+                        // Handle other error responses
+                        alert(error.response.data.message || " user with this email already exists.");
+                    }
+                    else if (error.response.status === 500) {
+                        // Handle other error responses
+                        alert(error.response.data.message || " Server Error.");
+                    }
+                } else {
+                    // The request was made but no response was received
+                    alert("Something went wrong. Please try again later.");
+                }
             });
-            // Close the update modal
-            setupdateModal(false);
-            // Refresh the user list
-            getUsers();
-        })
-        .catch(error => {
-            // Handle error response
-            if (error.response) {
-                // The request was made and the server responded with a status code that falls out of the range of 2xx
-                if (error.response.status === 401) {
-                    // Handle 401 Unauthorized error
-                    const errorMessage = error.response.data.detail || "Unauthorized access";
-                    alert(errorMessage);
-                } else if (error.response.status === 400) {
-                    // Handle other error responses
-                    alert(error.response.data.message || " user with this email already exists.");
-                }
-                else if (error.response.status === 500) {
-                    // Handle other error responses
-                    alert(error.response.data.message || " Server Error.");
-                }
-            } else {
-                // The request was made but no response was received
-                alert("Something went wrong. Please try again later.");
-            }
-        });
     };
-    
+
     const CloseUpdateModalUi = () => {
         setupdateModal(!updateModal)
     }
     function handleDeleteUser(id) {
         const token = localStorage.getItem('token'); // Define the token variable here
         return (
-            axios.delete(`${baseUrl}/auth/delete-user/${id}/`, // Pass the user ID as part of the URL path
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                })
-                .then(response => {
-                    // Handle success response
-                    Swal.fire({
-                        title: "Es-tu sûr?",
-                        text: "Vous ne pourrez pas revenir en arrière!",
-                        icon: "warning",
-                        showCancelButton: true,
-                        confirmButtonColor: "#3085d6",
-                        cancelButtonColor: "#d33",
-                        confirmButtonText: "Oui, effacer-le!"
-                    }).then((result) => {
-                        if (result.isConfirmed) {
+
+            // Handle success response
+            Swal.fire({
+                title: "Es-tu sûr?",
+                text: "Vous ne pourrez pas revenir en arrière!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Oui, effacer-le!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    axios.delete(`${baseUrl}/auth/delete-user/${id}/`, // Pass the user ID as part of the URL path
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        })
+                        .then(response => {
+
                             setUsers(users.filter(user => user.id !== id));
                             Swal.fire({
                                 title: "effacer!",
                                 text: "L'utilisateur a été effacé.",
                                 icon: "success"
                             });
-                        }
-                    });
-                })
+                        })
+                }
+
+            })
                 .catch(function (error) {
                     // Handle error response
                     if (error.response) {
@@ -245,9 +249,6 @@ const Profile = (props) => {
                 )
         )
     }
-    
-    
-
     return (
         <>
             {/* <HeaderSection

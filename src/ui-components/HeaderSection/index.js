@@ -1,10 +1,10 @@
-const HeaderSection = ({ heading, subHeading, rightItem = () => {} }) => {
+const HeaderSection = ({ heading, subHeading, rightItem = () => { }, role }) => {
   return (
-    <header style={{ 
+    <header style={{
       margin: "20px",
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'space-between' 
+      justifyContent: 'space-between'
     }}>
       <div>
         <h1 style={{ fontSize: "30px" }}>{heading}</h1>

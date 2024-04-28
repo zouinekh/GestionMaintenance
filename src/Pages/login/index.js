@@ -21,8 +21,9 @@ const Login = () => {
         console.log("Login successful", response.data);
         localStorage.setItem('token', response.data.access_token);
         localStorage.setItem('user', JSON.stringify(response.data));
+        
         if (response.data.role == 1) {
-          window.location.href = "/dashboard"
+          window.location.href = "/admin"
         } else {
           alert("other roles side still working on ")
         }
@@ -33,10 +34,10 @@ const Login = () => {
           const errorMessage = error.response.data.messages[0].message;
           // Handle the error message, for example, display it in an alert
           alert(errorMessage);
-      } else {
+        } else {
           // Handle other types of errors
           alert("Something went wrong. Please try again later.");
-      }
+        }
       });
 
   }

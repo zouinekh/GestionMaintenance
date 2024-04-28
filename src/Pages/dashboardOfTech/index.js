@@ -1,19 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import Card from "@aio/components/Card";
+import { useState } from "react";
 import Modal from "@aio/components/Modal";
-import styles from "./Home.module.css";
 
-import DoughnutChartExample from "../../components/DoughnutChartExample";
 import HeaderSection from "@aio/components/HeaderSection";
 import DataCard from "@aio/components/DataCard";
-import { SlCalender } from "react-icons/sl";
-import ActionButton from "@aio/components/ActionButton";
-import { AiOutlinePlusCircle } from "react-icons/ai";
+
 import Section from "@aio/components/Section";
 
 import BillingHistory from "../../components/BillingHistory";
-import Paragraph from "../../components/Paragraph";
-import BarChartExample from "../../components/BarChartExample";
+
 
 export default function Dashboard() {
   const [modal, setModal] = useState(false);
@@ -26,7 +20,7 @@ export default function Dashboard() {
   const handleCancel = () => {
     setModal(false);
   }
-
+    ;
   const handleSubmit = () => {
     alert('Submit is working..!');
     handleClose();
@@ -37,6 +31,7 @@ export default function Dashboard() {
       <HeaderSection
         heading={"Dashboard"}
         subHeading={"Welcome to aio dashboard"}
+        role={2}
       // rightItem={() => (
       //   <ActionButton
       //     onClick={() => setModal(true)}
