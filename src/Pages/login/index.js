@@ -21,23 +21,18 @@ const Login = () => {
         console.log("Login successful", response.data);
         localStorage.setItem('token', response.data.access_token);
         localStorage.setItem('user', JSON.stringify(response.data));
-        
+        console.log(response)
         if (response.data.role == 1) {
           window.location.href = "/admin"
+        } else if (response.data.role == 2) {
+          window.location.href = "/technician"
+
         } else {
           alert("other roles side still working on ")
         }
       })
       .catch(error => {
-        if (error.response && error.response.data) {
-          // Retrieve the message from the backend response
-          const errorMessage = error.response.data.messages[0].message;
-          // Handle the error message, for example, display it in an alert
-          alert(errorMessage);
-        } else {
-          // Handle other types of errors
-          alert("Something went wrong. Please try again later.");
-        }
+        alert("Invalid login credentials")
       });
 
   }

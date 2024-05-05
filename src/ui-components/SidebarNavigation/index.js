@@ -16,7 +16,7 @@ const SidebarNavigation = ({
 
   const [role, setRole] = useState();
   const techniciensRoutes = [{
-    to: '/',
+    to: '/technician',
     name: 'Home',
     Icon: IoHomeOutline
   },
@@ -24,12 +24,16 @@ const SidebarNavigation = ({
     to: '/lignesAssigned',
     name: 'ligne',
     Icon: BsSpeedometer2
+  },
+  {
+    to: '/lignesCompleted',
+    name: 'Completed lignes',
+    Icon: BsSpeedometer2
   },]
   useEffect(() => {
     const user = localStorage.getItem("user")
     console.log()
-    // setRole(JSON.parse(user).role)
-    setRole(2)
+    setRole(JSON.parse(user).role)
   }, []);
   const router = useRouter();
 

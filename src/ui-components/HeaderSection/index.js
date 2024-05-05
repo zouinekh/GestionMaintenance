@@ -1,4 +1,4 @@
-const HeaderSection = ({ heading, subHeading, rightItem = () => { }, role }) => {
+const HeaderSection = ({ heading, subHeading, rightItem = () => { } }) => {
   return (
     <header style={{
       margin: "20px",

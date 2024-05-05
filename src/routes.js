@@ -6,7 +6,7 @@ import { AiOutlineBarChart } from "react-icons/ai";
 // eslint-disable-next-line import/no-anonymous-default-export
 export default [
     {
-        to: '/',
+        to: '/admin',
         name: 'Home',
         Icon: IoHomeOutline
     },

@@ -31,7 +31,6 @@ export default function Dashboard() {
       <HeaderSection
         heading={"Dashboard"}
         subHeading={"Welcome to aio dashboard"}
-        role={2}
       // rightItem={() => (
       //   <ActionButton
       //     onClick={() => setModal(true)}

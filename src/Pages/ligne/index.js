@@ -471,7 +471,7 @@ function ligne() {
                                             {
                                                 users.map((user, key) => {
                                                     return (
-                                                        <option key={key} value={user.id}>{`${user.first_name} ${user.last_name}`}</option>
+                                                        <option key={key} value={user.id}>{`${user.email}`}</option>
 
                                                     )
                                                 })

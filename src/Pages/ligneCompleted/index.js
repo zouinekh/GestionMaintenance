@@ -4,10 +4,12 @@ import ActionButton from '@aio/components/ActionButton';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
-import { AiOutlinePlusCircle } from 'react-icons/ai';
+import { AiFillWarning, AiOutlinePlusCircle } from 'react-icons/ai';
 import { baseUrl } from 'utils/baseUrl';
 import Swal from 'sweetalert2'
+import { GrValidate } from "react-icons/gr";
 
+import { CiWarning } from "react-icons/ci";
 
 export default function LigneAssigned() {
     const [storedToken, setStoredToken] = useState('');
@@ -70,8 +72,7 @@ export default function LigneAssigned() {
 
                     "status": "completed",  // Update the status
                     "realisation_date": formattedDate,  // Update the realization date
-                    "comment": "", // Update the comment
-                    "confirmed": true
+                    "comment": ""  // Update the comment
                 }
                 axios.put(`${baseUrl}/technicien/update/${id}/`, body, config).then((res) => {
                     const updatedLignes = lignes.filter(line => line.id !== id);
@@ -186,7 +187,7 @@ export default function LigneAssigned() {
             };//http://localhost:8000/technicien/get/
             const response = await axios.get(`${baseUrl}/technicien/get/`, config);
             console.log(response)
-            const filteredLignes = response.data.filter(ligne => ligne.status != 'completed');
+            const filteredLignes = response.data.filter(ligne => ligne.status == 'completed');
             console.log('Filtered Lignes:', filteredLignes);
 
             setLignes(filteredLignes);
@@ -232,54 +233,31 @@ export default function LigneAssigned() {
                                 <th scope="col">Titre de ligne</th>
                                 <th scope="col">Date de affectation </th>
                                 <th scope="col">Status</th>
-                                <th scope="col">confirmed</th>
-                                <th scope="col">Not confirmed</th>
-                                <th scope="col">Change status</th>
+                                <th scope="col">Validation status</th>
+                                <th scope="col">comment</th>
+                                <th scope="col"></th>
                             </tr>
                         </thead>
                         <tbody>
                             {
-                                lignes.length > 0 ?
-                                    lignes.map((ligne, index) => {
+                                lignes.map((ligne, index) => {
 
 
-                                        return (
+                                    return (
 
-                                            <tr key={index} style={{ backgroundColor: ligne.status === "pending" ? "#FFC55A" : "#90D26D", color: "" }}>
-                                                <td>{ligne.id}</td>
-                                                <td>{ligne.ligne_title}</td>
-                                                <td>{new Date(ligne.affectation_date).toLocaleString()}</td>
-                                                <td>{ligne.status}</td>
-                                                <td onClick={(e) => {
-                                                    confirmLigne(ligne.id)
-                                                }}
-                                                    style={{}}
-                                                >
-                                                    <div style={{ fontWeight: "bold", cursor: 'pointer', fontSize: 13, color: "black" }}> confirm</div>
-                                                </td>
-                                                <td onClick={(e) => unconfirmLigne(ligne.id)} style={{ fontWeight: "bold", cursor: 'pointer', fontSize: 13, color: "black" }} >unconfirmed</td>
-                                                <td onClick={(e) => changeStatus(ligne.id)} style={{ fontWeight: "bold", cursor: 'pointer', fontSize: 13, color: "black" }} >status</td>
+                                        <tr key={index} >
+                                            <td>{ligne.id}</td>
+                                            <td>{ligne.ligne_title}</td>
+                                            <td>{new Date(ligne.affectation_date).toLocaleString()}</td>
+                                            <td>{ligne.status}</td>
+                                            <td> {ligne.confirmed ? "confirmed" : "not confirmed"}  </td>
+                                            <td style={{ fontWeight: "bold", cursor: 'pointer', fontSize: 13, color: "black" }} >{ligne.comment}</td>
+                                            {ligne.confirmed ? <GrValidate size={22} color='green' /> : <td><AiFillWarning size={22} color='red' /></td>}
 
-                                            </tr>)
 
-                                    }) : <>
-                                        <tr >
-                                            <td>No ligned Assigned</td>
-                                            <td>No ligned Assigned</td>
-                                            <td>No ligned Assigned</td>
-                                            <td>No ligned Assigned</td>
-                                            <td onClick={(e) => {
-                                                confirmLigne(ligne.id)
-                                            }}
-                                                style={{}}
-                                            >
-                                            </td>
-                                            <td onClick={(e) => unconfirmLigne(ligne.id)} style={{ fontWeight: "bold", cursor: 'pointer', fontSize: 13, color: "black" }} >No ligned Assigned</td>
-                                            <td onClick={(e) => changeStatus(ligne.id)} style={{ fontWeight: "bold", cursor: 'pointer', fontSize: 13, color: "black" }} >No ligned Assigned</td>
+                                        </tr>)
 
-                                        </tr>
-                                    </>
-
+                                })
                             }
                         </tbody>
                     </table>
