@@ -30,14 +30,27 @@ const SidebarNavigation = ({
     name: 'Completed lignes',
     Icon: BsSpeedometer2
   },]
+  const validatorRoutes = [{
+    to: '/validator',
+    name: 'Home',
+    Icon: IoHomeOutline
+  },
+  {
+    to: '/ligneFinal',
+    name: 'ligne',
+    Icon: BsSpeedometer2
+  },
+  ]
   useEffect(() => {
     const user = localStorage.getItem("user")
     console.log()
-    setRole(JSON.parse(user).role)
+    // setRole(JSON.parse(user).role)
+    setRole(3)
+
   }, []);
   const router = useRouter();
 
-  console.log({ router });
+
 
   return (
     <section className={`${styles.container} ${sidebarMenuActive ? styles['active'] : ''}`}>
@@ -49,8 +62,7 @@ const SidebarNavigation = ({
         <div className={styles['logo-explain']}>Admin Dashboard</div>
       </div>
       <ul className={styles["sidebar-container"]}>
-        {role == 1 ?
-
+        {role === 1 && (
           routes.map((page, index) => (
             <li key={index} className={`${styles["sidebar-menu-item"]} ${router.route === page.to ? styles['active'] : ''}`}>
               <Link href={page.to}>
@@ -59,7 +71,8 @@ const SidebarNavigation = ({
               </Link>
             </li>
           ))
-          :
+        )}
+        {role === 2 && (
           techniciensRoutes.map((page, index) => (
             <li key={index} className={`${styles["sidebar-menu-item"]} ${router.route === page.to ? styles['active'] : ''}`}>
               <Link href={page.to}>
@@ -68,7 +81,18 @@ const SidebarNavigation = ({
               </Link>
             </li>
           ))
-        }
+        )}
+        {role !== 1 && role !== 2 && (
+          validatorRoutes.map((page, index) => (
+            <li key={index} className={`${styles["sidebar-menu-item"]} ${router.route === page.to ? styles['active'] : ''}`}>
+              <Link href={page.to}>
+                <page.Icon />
+                <span>{page.name}</span>
+              </Link>
+            </li>
+          ))
+        )}
+
       </ul>
 
       <ul className={styles["sidebar-footer"]}>
