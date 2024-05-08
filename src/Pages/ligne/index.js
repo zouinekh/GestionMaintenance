@@ -19,6 +19,7 @@ function ligne() {
     const { register, handleSubmit, formState: { errors } } = useForm();
     const [assignedError, setAssignedError] = useState(false);
     const [users, setUsers] = useState([]);
+    const [ligneAssignments, setLigneAssignments] = useState([]);
 
     const [lignes, setLignes] = useState([{
 
@@ -171,19 +172,41 @@ function ligne() {
     const getAllLignes = async () => {
         try {
             const token = localStorage.getItem('token');
-            console.log('Token:', token); // Check token value
             const config = {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             };
-            const response = await axios.get(`${baseUrl}/lignes/`, config);
-            console.log('Response:', response.data);
-            setLignes(response.data);
+    
+            // Fetch lignes data
+            const responseLignes = await axios.get(`${baseUrl}/lignes/`, config);
+            const lignesData = responseLignes.data;
+    
+            // Fetch lignesAssignTo data
+            const responseLignesAssignTo = await axios.get(`${baseUrl}/lignesAssignTo/`, config);
+            const lignesAssignToData = responseLignesAssignTo.data;
+    
+            // Map lignes data and add status from lignesAssignTo
+            const mappedLignes = lignesData.map(ligne => {
+                // Find corresponding lignesAssignTo object
+                const ligneAssignTo = lignesAssignToData.find(assignTo => assignTo.ligne === ligne.id);
+                // If lignesAssignTo object found, add status to ligne object
+                if (ligneAssignTo) {
+                    return {
+                        ...ligne,
+                        status: ligneAssignTo.status
+                    };
+                } else {
+                    return ligne;
+                }
+            });
+    
+            setLignes(mappedLignes);
         } catch (error) {
             console.error('Error fetching lignes:', error);
         }
     };
+    
     
     function updateAsignementToUser(ligne) {
         const userOptions = {};
@@ -377,7 +400,8 @@ function ligne() {
                             <col style={{ width: "10%" }} /> {/* Date de Realisation prev */}
                             <col style={{ width: "10%" }} /> {/* Date de creation */}
                             <col style={{ width: "10%" }} /> {/* Edit */}
-                            <col style={{ width: "20%" }} /> {/* Assigné à */}
+                            <col style={{ width: "10%" }} /> {/* Assigné à */}
+                            <col style={{ width: "10%" }} /> {/* Assigné à */}
                             <col style={{ width: "10%" }} /> {/* Supprimer */}
                         </colgroup>
                         <thead>
@@ -387,31 +411,31 @@ function ligne() {
                                 <th scope="col">Date de Realisation prev</th>
                                 <th scope="col">Date de creation </th>
                                 <th scope="col">edit: </th>
-                                <th scope="col">Assigné à : </th>
-                                <th scope="col">supprimer  : </th>
+                                <th scope="col">Assigné à  </th>
+                                <th scope="col"> Status </th>
+                                <th scope="col">supprimer   </th>
 
                             </tr>
                         </thead>
                         <tbody>
-                            {
-                                lignes.map((ligne, index) => {
-                                    return (
-                                        <tr key={index}>
-                                            <td>{ligne.id}</td>
-                                            <td>{ligne.title}</td>
-                                            <td>{ligne.daterealisation}</td>
-                                            <td>{new Date(ligne.daterealisation).toLocaleString()}</td>
-                                            <td onClick={(e) => {
-                                                setSelectedLigne(ligne)
-                                                setUpdateModal(true)
-                                            }}>Edit</td>
-                                            <td onClick={(e) => assignToUser(ligne)}>Assigné</td>
-                                            <td onClick={(e) => handleDeletLigne(ligne.id)}>Supprimer</td>
+    {lignes.map((ligne, index) => (
+        <tr key={index}>
+            <td>{ligne.id}</td>
+            <td>{ligne.title}</td>
+            <td>{ligne.daterealisation}</td>
+            <td>{new Date(ligne.daterealisation).toLocaleString()}</td>
+            <td onClick={(e) => {
+                setSelectedLigne(ligne);
+                setUpdateModal(true);
+            }}>Edit</td>
+            <td onClick={(e) => assignToUser(ligne)}>Assigné</td>
+            <td>{ligne.status || 'Not assigned'}</td> {/* Display status here */}
+            <td onClick={(e) => handleDeletLigne(ligne.id)}>Supprimer</td>
+        </tr>
+    ))}
+</tbody>
 
-                                        </tr>)
-                                })
-                            }
-                        </tbody>
+
                     </table>
                 </div>
                 {modal ? (

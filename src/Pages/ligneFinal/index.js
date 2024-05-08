@@ -50,36 +50,37 @@ export default function LigneAssigned() {
             confirmButtonText: "Confirm",
         }).then((result) => {
             if (result.isConfirmed) {
+                
                 //TODO: uri of the endpoint of update  id passed by params in then use the swal in the line 38 dont forget to update also the status and remove from the ligne table
-                // const token = localStorage.getItem('token');
-                // console.log('Token:', token); // Check token value
-                // const config = {
-                //     headers: {
-                //         Authorization: `Bearer ${token}`
-                //     }
-                // };
-                // const currentDate = new Date();
+                 const token = localStorage.getItem('token');
+                 console.log('Token:', token); // Check token value
+                 const config = {
+                     headers: {
+                         Authorization: `Bearer ${token}`
+                     }
+                 };
+                 const currentDate = new Date();
 
-                // // Get year, month, and day
-                // const year = currentDate.getFullYear();
-                // const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Month is zero-based
-                // const day = currentDate.getDate().toString().padStart(2, '0');
+                 // Get year, month, and day
+                 const year = currentDate.getFullYear();
+                 const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Month is zero-based
+                 const day = currentDate.getDate().toString().padStart(2, '0');
 
-                // // Format the date
-                // const formattedDate = `${year}-${month}-${day}`;
+                 // Format the date
+                 const formattedDate = `${year}-${month}-${day}`;
 
-                // const body = {
+                 const body = {
 
-                //     "status": "completed",  // Update the status
-                //     "realisation_date": formattedDate,  // Update the realization date
-                //     "comment": ""  // Update the comment
-                // }
-                // axios.put(`${baseUrl}/technicien/update/${id}/`, body, config).then((res) => {
-                //     const updatedLignes = lignes.filter(line => line.id !== id);
-                //     setLignes(updatedLignes)
-                //     Swal.fire("Saved!", "", "success");
-                //     console.log(res)
-                // })
+                     "status": "completed",  // Update the status
+                     "realisation_date": formattedDate,  // Update the realization date
+                     "comment": ""  // Update the comment
+                 }
+                 axios.put(`${baseUrl}/lignesAssignTo/update/${id}/`, body, config).then((res) => {
+                     const updatedLignes = lignes.filter(line => line.id !== id);
+                     setLignes(updatedLignes)
+                     Swal.fire("Saved!", "", "success");
+                     console.log(res)
+                 })
                 Swal.fire("Saved!", "", "success");
 
 

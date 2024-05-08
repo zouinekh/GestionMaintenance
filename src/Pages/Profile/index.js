@@ -124,7 +124,7 @@ const Profile = (props) => {
                     }
                     else if (error.response.status === 500) {
                         // Handle other error responses
-                        alert(error.response.data.message || " Server Error.");
+                        alert(" Error sending mail verify of the mail is valid.");
                     }
                 } else {
                     // The request was made but no response was received

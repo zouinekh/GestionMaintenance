@@ -44,8 +44,7 @@ const SidebarNavigation = ({
   useEffect(() => {
     const user = localStorage.getItem("user")
     console.log()
-    // setRole(JSON.parse(user).role)
-    setRole(3)
+    setRole(JSON.parse(user).role)
 
   }, []);
   const router = useRouter();

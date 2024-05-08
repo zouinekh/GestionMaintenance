@@ -28,7 +28,7 @@ const Login = () => {
           window.location.href = "/technician"
 
         } else {
-          alert("other roles side still working on ")
+          window.location.href = "/validator"
         }
       })
       .catch(error => {
