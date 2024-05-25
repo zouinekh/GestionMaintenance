@@ -10,84 +10,108 @@ import Swal from 'sweetalert2'
 import { BsCheckLg } from 'react-icons/bs';
 
 
-function ligne() {
+function Test() {
 
     const [storedToken, setStoredToken] = useState('');
     const [modal, setModal] = useState(false);
     const [updateModal, setUpdateModal] = useState(false);
+    const [updateBanc, setUpdateBanc] = useState(false);
     const [assignModal, setAssignModal] = useState(false);
+    const [selectedTest, setSelectedTest] = useState({});
     const [selectedLigne, setSelectedLigne] = useState({});
     const { register, handleSubmit, formState: { errors } } = useForm();
-    const [users, setUsers] = useState([]);
     const [lignes, setLignes] = useState([]);
     const [ligneTests, setLigneTests] = useState([]);
     const [tests, setTests] = useState([]);
 
     const onSubmit = async (data) => {
-        const date = new Date();
-        let newLigne = {
-            "title": data.titre,
-            "sem": data.sem,
+        let newTest = {
+            name: data.name
+        };
+
+        let Assign = {
+            ligne: "",
+            test: ""
+        };
+
+        if (data.ligne !== "") {
+            Assign.ligne = data.ligne;
         }
 
         try {
-            // Send the request to create a new Ligne object
-            const response = await axios.post(`${baseUrl}/lignes/`, newLigne, {
+            // Send the request to create a new Test object
+            const response = await axios.post(`${baseUrl}/lignes/tests/`, newTest, {
                 headers: {
                     Authorization: `Bearer ${storedToken}`
                 }
             });
 
-            // If the Ligne creation is successful, create the related LignesAssignto object
             if (response.status === 201 || response.status === 200) {
-                const ligneId = response.data.id;
-                setLignes([...lignes, newLigne]);
-                handleClose(); // Close the form or perform any other necessary action
+                const TestId = response.data.id;
+                Assign.test = TestId;
+                setTests([...tests, { ...newTest, id: TestId }]);
+                Swal.fire({
+                    icon: "success",
+                    title: "Test created successfully",
+                    text: "Test created successfully"
+                });
+
+                if (Assign.test !== "") {
+                    const responseAssign = await axios.post(`${baseUrl}/lignes/ligne-tests/`, Assign, {
+                        headers: {
+                            Authorization: `Bearer ${storedToken}`
+                        }
+                    });
+
+                    if (responseAssign.status === 201 || responseAssign.status === 200) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Test Assigned to ligne successfully",
+                            text: "Test Assigned to ligne successfully"
+                        });
+                        window.location.reload();
+                    } else {
+                        throw new Error('Error assigning test to ligne');
+                    }
+                }
+            } else {
+                throw new Error('Error creating test');
             }
+
         } catch (error) {
             // Handle errors
-            console.error('Error creating Ligne:', error);
+            console.error('Error creating test:', error);
             Swal.fire({
                 icon: "error",
-                title: "Error creating Ligne...",
-                text: error,
+                title: "Error creating test...",
+                text: error.message || error
             });
+        } finally {
+            handleClose();
         }
     };
-    async function updateLigne(data) {
-        let newLinge = {
-            "title": data.titre,
-            "sem": data.sem,
+
+    async function updateTest(data) {
+        let newTest = {
+            name: data.name,
         }
         try {
-            const response = await axios.put(`${baseUrl}/lignes/${selectedLigne.id}`, newLinge, {
+            const response = await axios.put(`${baseUrl}/lignes/tests/${selectedTest.id}/`, newTest, {
                 headers: {
                     Authorization: `Bearer ${storedToken}`
                 }
             });
             if (response.status === 200) {
                 // Update lignes state with the updated ligne
-                setLignes(prevLignes => {
-                    const updatedLignes = prevLignes.map(ligne => {
-                        if (ligne.id === selectedLigne.id) {
-                            return {
-                                ...ligne,
-                                title: newLinge.title,
-                                sem: newLinge.sem
-                            };
-                        }
-                        return ligne;
-                    });
-                    return updatedLignes;
-                });
                 setUpdateModal(false);
-                setSelectedLigne({});
+                setSelectedTest({});
+                window.location.reload();
             }
         } catch (error) {
-            console.error('Error updating Ligne:', error);
+            console.error('Error updating Test:', error);
             Swal.fire({
                 icon: "error",
-                title: "Error updating Ligne...",
+                title: "Error updating Test...",
                 text: error,
             });
         }
@@ -98,24 +122,6 @@ function ligne() {
     const openModal = () => {
         setModal(true);
     };
-    const getUsers = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            console.log('Token:', token); // Check token value
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            };
-            const response = await axios.get(`${baseUrl}/auth/users/`, config);
-            console.log(response.data);
-            const filteredUsers = response.data.filter(user => user.role === 2);
-            setUsers(filteredUsers);
-        } catch (error) {
-            console.error('Error fetching lignes:', error);
-        }
-
-    }
     const getAllLignes = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -153,10 +159,10 @@ function ligne() {
             console.error('Error fetching tests:', error);
         }
     };
-    const checkIfLigneAssignedToTest = (ligneId) => {
-        return ligneTests.some(lt => lt.ligne === ligneId);
+    const checkIfLigneAssignedToTest = (testId) => {
+        return ligneTests.some(lt => lt.test === testId);
     };
-    const handleDeletLigne = async (id) => {
+    const handleDeletTest = async (id) => {
         try {
             Swal.fire({
                 title: "Are you sure?",
@@ -169,24 +175,24 @@ function ligne() {
             }).then((result) => {
                 if (result.isConfirmed) {
                     axios
-                        .delete(`${baseUrl}/lignes/${id}`, {
+                        .delete(`${baseUrl}/lignes/tests/${id}/`, {
                             headers: { Authorization: `Bearer ${storedToken}` },
                         })
                         .then(() => {
-                            setLignes(lignes.filter((ligne) => ligne.id !== id));
+                            setTests(tests.filter((test) => test.id !== id));
                             Swal.fire({
                                 title: "Deleted!",
-                                text: "Ligne has been deleted.",
+                                text: "Test has been deleted.",
                                 icon: "success",
                             });
                         });
                 }
             });
         } catch (err) {
-            console.error('Error deleting Ligne:', err);
+            console.error('Error deleting Test:', err);
             Swal.fire({
                 icon: "error",
-                title: "Error deleting Ligne...",
+                title: "Error deleting Test...",
                 text: err,
             });
         }
@@ -195,7 +201,8 @@ function ligne() {
     const assignToTest = async (data) => {
         const assign = {
             "ligne": data.ligne,
-            "test": data.test,
+            "test": selectedTest.id,
+
             "periodicity": data.periodicity
         };
 
@@ -211,6 +218,7 @@ function ligne() {
                     text: "Ligne assigned to test successfully",
                 });
                 handleClose();
+                window.location.reload();
             } else {
                 Swal.fire({
                     icon: "error",
@@ -228,6 +236,73 @@ function ligne() {
             });
         }
     };
+    const handleTestSelect = (test) => {
+        setSelectedTest(test);
+        console.log(test);
+
+        // Find the corresponding ligneTest
+        const ligneTest = ligneTests.find(lt => lt.test === test.id);
+        console.log(ligneTest);
+
+        if (ligneTest) {
+            // Find the associated ligne
+            const ligne = lignes.find(ligne => ligne.id === ligneTest.ligne);
+            console.log(ligne);
+
+            if (ligne) {
+                setSelectedLigne(ligne); // Set the selected ligne here
+            } else {
+                console.log("No corresponding ligne found");
+            }
+        } else {
+            console.log("No ligneTest found for the test");
+        }
+    };
+
+    const AddBanc = async (data) => {
+        try {
+            // Find the corresponding ligneTest
+            const ligneTest = ligneTests.find(lt => lt.test === selectedTest.id && lt.ligne === selectedLigne.id);
+            if (!ligneTest) {
+                throw new Error('LigneTest not found for the selected test and ligne');
+            }
+            const ligneTestId = ligneTest.id;
+    
+            const newBanc = {
+                ligne_test: ligneTestId,
+                banc_name: data.banc_name,
+                validation_date: data.validation_date,
+            };
+    
+            const response = await axios.post(`${baseUrl}/lignes/bancs/`, newBanc, {
+                headers: {
+                    Authorization: `Bearer ${storedToken}`
+                }
+            });
+    
+            if (response.status === 201) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Banc created successfully",
+                    text: "Banc created successfully"
+                });
+                window.location.reload();
+            } else {
+                throw new Error('Error creating banc');
+            }
+        } catch (error) {
+            console.error('Error creating banc:', error);
+            Swal.fire({
+                icon: "error",
+                title: "Error creating banc...",
+                text: error.message || error
+            });
+        } finally {
+            setUpdateBanc(false);
+        }
+    };
+    
+
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const token = localStorage.getItem('token');
@@ -235,7 +310,6 @@ function ligne() {
             console.log(storedToken);
         }
         getAllLignes();
-        getUsers();
         getAllLigneTests();
         getAllTests();
     }, []);
@@ -246,7 +320,7 @@ function ligne() {
                 <div style={{ paddingBottom: 22 }}>
                     <ActionButton
                         Icon={AiOutlinePlusCircle}
-                        label="Ajouter nouveau ligne"
+                        label="Ajouter nouveau test"
                         onClick={openModal}
 
                     />
@@ -257,7 +331,6 @@ function ligne() {
                             <col style={{ width: "5%" }} /> {/* ID */}
                             <col style={{ width: "15%" }} /> {/* Titre de ligne */}
                             <col style={{ width: "10%" }} /> {/* Date de Realisation prev */}
-                            <col style={{ width: "10%" }} /> {/* Date de creation */}
                             <col style={{ width: "10%" }} /> {/* Edit */}
                             <col style={{ width: "10%" }} /> {/* Assigné à */}
                             <col style={{ width: "10%" }} /> {/* Assigné à */}
@@ -266,35 +339,45 @@ function ligne() {
                         <thead>
                             <tr>
                                 <th scope="col">ID</th>
-                                <th scope="col">Titre de ligne</th>
-                                <th scope="col">Date de creation</th>
-                                <th scope="col">Semaine </th>
+                                <th scope="col">Nom du test</th>
+                                <th scope="col">Nombre du banc</th>
                                 <th scope="col">edit: </th>
                                 <th scope="col">Assigné à  </th>
-                                <th scope="col"> Status </th>
+                                <th scope="col"> bancs </th>
                                 <th scope="col">supprimer   </th>
 
                             </tr>
                         </thead>
                         <tbody>
-                            {lignes.map((ligne, index) => (
+                            {tests.map((test, index) => (
                                 <tr key={index}>
-                                    <td>{ligne.id}</td>
-                                    <td>{ligne.title}</td>
-                                    <td>{new Date(ligne.datecreation).toLocaleDateString()}</td>
-                                    <td>{ligne.sem}</td>
+                                    <td>{test.id}</td>
+                                    <td>{test.name}</td>
+                                    <td>{test.nbr_banc}</td>
                                     <td onClick={(e) => {
-                                        setSelectedLigne(ligne);
+                                        setSelectedTest(test);
                                         setUpdateModal(true);
                                     }}>Edit</td>
                                     <td onClick={() => {
-                                        setSelectedLigne(ligne);
+                                        setSelectedTest(test);
                                         setAssignModal(true);
                                     }}>
-                                        {checkIfLigneAssignedToTest(ligne.id) ? 'Assigned' : 'Not Assigned'}
+                                        {checkIfLigneAssignedToTest(test.id) ? 'Assigned' : 'Not Assigned'}
                                     </td>
-                                    <td>{ligne.status || 'Not assigned'}</td> {/* Display status here */}
-                                    <td onClick={(e) => handleDeletLigne(ligne.id)}>Supprimer</td>
+                                    <td onClick={(e) => {
+                                        if (checkIfLigneAssignedToTest(test.id)) {
+                                            setSelectedTest(test);
+                                            handleTestSelect(test);
+                                            setUpdateBanc(true);
+                                        } else {
+                                            Swal.fire({
+                                                icon: "error",
+                                                title: "Impossible",
+                                                text: "Vous ne pouvez pas ajouter des bancs si le test n'est pas assigné.",
+                                            });
+                                        }
+                                    }}>Ajouter des bancs</td>
+                                    <td onClick={(e) => handleDeletTest(test.id)}>Supprimer</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -306,7 +389,7 @@ function ligne() {
                     <section className={"modal-bg"}>
                         <div className={"modal-container"}>
                             <div className={"modal-header"}>
-                                <h3 className={"modal-heading"}>Ajouter une nouvelle ligne</h3>
+                                <h3 className={"modal-heading"}>Ajouter une nouvelle test</h3>
                                 <button
                                     onClick={handleClose}
                                     className={"close-btn"}
@@ -331,25 +414,29 @@ function ligne() {
 
                                     <label>
                                         <input
-                                            {...register("titre", { required: true })}
+                                            {...register("name", { required: true })}
                                             placeholder=""
                                             type="text"
                                             className="input"
                                         />
-                                        <span>Titre de la ligne</span>
-                                        {errors.titre && <p style={{ color: "red", padding: 3, fontSize: 14, fontWeight: "400" }} className="error-message">Titre requis</p>}
+                                        <span>nom du test</span>
+                                        {errors.name && <p style={{ color: "red", padding: 3, fontSize: 14, fontWeight: "400" }} className="error-message">nom du test requis</p>}
                                     </label>
 
-                                    <label>
-                                        <input
-                                            {...register("sem", { required: true })}
-                                            placeholder=""
-                                            type="text"
-                                            className="input"
-                                        />
-                                        <span>Semaine du ligne (sem 1)</span>
-                                        {errors.sem && <p style={{ color: "red", padding: 3, fontSize: 14, fontWeight: "400" }} className="error-message">Semaine requis</p>}
-                                    </label>
+                                    <div className="dropdown">
+                                        <select {...register("ligne")} className="dropbtn">
+                                            <option value="" disabled selected hidden>Assigné à :</option>
+                                            <option value=""  >aucun ligne</option>
+                                            {
+                                                lignes.map((ligne, key) => {
+                                                    return (
+                                                        <option key={key} value={ligne.id}>{`${ligne.title + " " + ligne.sem}`}</option>
+
+                                                    )
+                                                })
+                                            }
+                                        </select>
+                                    </div>
 
                                     <button type="submit" className="submit">Submit</button>
                                 </form>
@@ -362,7 +449,7 @@ function ligne() {
                     <section className={"modal-bg"}>
                         <div className={"modal-container"}>
                             <div className={"modal-header"}>
-                                <h3 className={"modal-heading"}>Modifier  ligne</h3>
+                                <h3 className={"modal-heading"}>Modifier Test</h3>
                                 <button
                                     onClick={(e) => setUpdateModal(false)}
                                     className={"close-btn"}
@@ -371,7 +458,7 @@ function ligne() {
                                 </button>
                             </div>
                             <div className={"modal-body"}>
-                                <form className="form" onSubmit={handleSubmit(updateLigne)}>
+                                <form className="form" onSubmit={handleSubmit(updateTest)}>
                                     <div className="flex">
                                         <label>
                                             <input
@@ -381,47 +468,20 @@ function ligne() {
                                                 className="input"
                                                 disabled
                                             />
-                                            <span>{selectedLigne.id}</span>
+                                            <span>{selectedTest.id}</span>
                                         </label>
                                     </div>
 
                                     <label>
                                         <input
-                                            {...register("titre", { required: true })}
+                                            {...register("name", { required: true })}
                                             placeholder=""
                                             type="text"
                                             className="input"
                                         />
-                                        <span>{selectedLigne.title}</span>
-                                        {errors.titre && <p style={{ color: "red", padding: 3, fontSize: 14, fontWeight: "400" }} className="error-message">Titre requis</p>}
+                                        <span>{selectedTest.name}</span>
+                                        {errors.name && <p style={{ color: "red", padding: 3, fontSize: 14, fontWeight: "400" }} className="error-message">name requis</p>}
                                     </label>
-
-                                    <label>
-                                        <input
-                                            {...register("sem", { required: true })}
-                                            placeholder=""
-                                            type="text"
-                                            className="input"
-                                        />
-                                        <span>{selectedLigne.sem}</span>
-                                        {errors.sem && <p style={{ color: "red", padding: 3, fontSize: 14, fontWeight: "400" }} className="error-message">semaine</p>}
-                                    </label>
-
-                                    {/* <div className="dropdown">
-                                        <select {...register("assigne")} className="dropbtn">
-                                            <option value="" disabled selected hidden>Assigné à :</option>
-                                            <option value=""  >no one</option>
-
-                                            {
-                                                users.map((user, key) => {
-                                                    return (
-                                                        <option key={key} value={user.id}>{`${user.first_name} ${user.last_name}`}</option>
-
-                                                    )
-                                                })
-                                            }
-                                        </select>
-                                    </div> */}
 
                                     <button type="submit" className="submit">Submit</button>
                                 </form>
@@ -448,34 +508,111 @@ function ligne() {
                                         </select>
                                     </label>
                                     <label>
-                                        <span>Test:</span>
-                                        <select {...register("test", { required: true })} className="input">
-                                            {tests.map((test, key) => (
-                                                <option key={key} value={test.id}>{test.name}</option>
-                                            ))}
-                                        </select>
+                                        <input
+                                            {...register("test")}
+                                            placeholder=""
+                                            type="text"
+                                            className="input"
+                                            disabled
+                                        />
+                                        <span>{selectedTest.name}</span>
                                     </label>
                                     <label>
                                         <input
                                             {...register("periodicity", { required: true })}
-                                            placeholder="Periodicity"
+                                            placeholder="Periodicity ( Hebdo ou annuelle )"
                                             type="text"
                                             className="input"
                                         />
                                         <span>Periodicity</span>
                                         {errors.periodicity && <p className="error-message">Periodicity requis</p>}
                                     </label>
-                                    {}
+                                    { }
                                     <button type="submit" className="submit">Submit</button>
                                 </form>
                             </div>
                         </div>
                     </section>
-                ):null}
+                ) : null}
+                {updateBanc ? (
+                    <section className={"modal-bg"}>
+                        <div className={"modal-container"}>
+                            <div className={"modal-header"}>
+                                <h3 className={"modal-heading"}>Ajouter un nouveau banc</h3>
+                                <button
+                                    onClick={(e) => setUpdateBanc(false)}
+                                    className={"close-btn"}
+                                >
+                                    X
+                                </button>
+                            </div>
+                            <div className={"modal-body"}>
+                                <style>
+                                    {`
+                                    .flex-row {
+                                        display: flex;
+                                        flex-direction: row;
+                                        gap: 20px; /* Adjust gap as needed */
+                                    }
+                                    .error-message {
+                                        color: red;
+                                        padding: 3px;
+                                        font-size: 14px;
+                                        font-weight: 400;
+                                    }
+                                    `}
+                                </style>
+                                <form className="form" onSubmit={handleSubmit(AddBanc)}>
+                                    <div className="flex-row">
+                                        <label>
+                                            <input
+                                                value={selectedTest.name}
+                                                placeholder=""
+                                                type="text"
+                                                className="input"
+                                                disabled
+                                            />
+                                        </label>
+                                        <label>
+                                            <input
+                                                value={selectedLigne.title || ''}
+                                                placeholder=""
+                                                type="text"
+                                                className="input"
+                                                disabled
+                                            />
+                                        </label>
+                                    </div>
+                                    <label>
+                                        <input
+                                            {...register("banc_name", { required: true })}
+                                            placeholder="Nom du banc"
+                                            type="text"
+                                            className="input"
+                                        />
+                                        <span>Nom du Banc</span>
+                                        {errors.banc_name && <p className="error-message">Nom du banc requis</p>}
+                                    </label>
+                                    <label>
+                                        <input
+                                            {...register("validation_date", { required: true })}
+                                            placeholder="Date de validation"
+                                            type="date"
+                                            className="input"
+                                        />
+                                        <span>Date de Realisation préventif</span>
+                                        {errors.validation_date && <p className="error-message">Date de validation requise</p>}
+                                    </label>
+                                    <button type="submit" className="submit">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+                ) : null}
             </div>
         </>
 
     )
 }
 
-export default ligne
+export default Test;

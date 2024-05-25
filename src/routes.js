@@ -20,12 +20,16 @@ export default [
         name: 'Users',
         Icon: BiUserCircle
     },
-
     {
-        to: '/test-components',
-        name: 'Test Components',
+        to: '/Test',
+        name: 'Test',
         Icon: IoGridOutline
     },
+    // {
+    //     to: '/test-components',
+    //     name: 'Test Components',
+    //     Icon: IoGridOutline
+    // },
     {
         to: '/statistics',
         name: 'Statistics',
