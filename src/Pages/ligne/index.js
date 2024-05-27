@@ -28,6 +28,7 @@ function ligne() {
         let newLigne = {
             "title": data.titre,
             "sem": data.sem,
+            "status":"pending"
         }
 
         try {
