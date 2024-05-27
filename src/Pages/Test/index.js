@@ -56,7 +56,7 @@ function Test() {
                     text: "Test created successfully"
                 });
 
-                if (Assign.test !== "") {
+                if (Assign.ligne !== "") {
                     const responseAssign = await axios.post(`${baseUrl}/lignes/ligne-tests/`, Assign, {
                         headers: {
                             Authorization: `Bearer ${storedToken}`

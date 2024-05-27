@@ -293,7 +293,7 @@ function ligne() {
                                     }}>
                                         {checkIfLigneAssignedToTest(ligne.id) ? 'Assigned' : 'Not Assigned'}
                                     </td>
-                                    <td>{ligne.status || 'Not assigned'}</td> {/* Display status here */}
+                                    <td>{ligne.status || 'Pending'}</td> {/* Display status here */}
                                     <td onClick={(e) => handleDeletLigne(ligne.id)}>Supprimer</td>
                                 </tr>
                             ))}
