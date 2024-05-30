@@ -25,157 +25,7 @@ export default function LigneAssigned() {
     },]);
 
 
-    async function getComment() {
-        const { value: text } = await Swal.fire({
-            input: "textarea",
-            inputLabel: "Comment",
-            inputPlaceholder: "Type your comment here...",
-            inputAttributes: {
-                "aria-label": "Type your comment here"
-            },
-            showCancelButton: true
-        });
-        if (text) {
-            return text
-        } else {
-            return "no comment"
-        }
-    }
 
-    function confirmLigne(id) {
-        Swal.fire({
-            title: "Do you want to Valide this ligne?",
-            showDenyButton: true,
-            showCancelButton: true,
-            confirmButtonText: "Confirm",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                //TODO: uri of the endpoint of update  id passed by params in then use the swal in the line 38 dont forget to update also the status and remove from the ligne table
-                const token = localStorage.getItem('token');
-                console.log('Token:', token); // Check token value
-                const config = {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                };
-                const currentDate = new Date();
-
-                // Get year, month, and day
-                const year = currentDate.getFullYear();
-                const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Month is zero-based
-                const day = currentDate.getDate().toString().padStart(2, '0');
-
-                // Format the date
-                const formattedDate = `${year}-${month}-${day}`;
-
-                const body = {
-
-                    "status": "completed",  // Update the status
-                    "realisation_date": formattedDate,  // Update the realization date
-                    "comment": ""  // Update the comment
-                }
-                axios.put(`${baseUrl}/technicien/update/${id}/`, body, config).then((res) => {
-                    const updatedLignes = lignes.filter(line => line.id !== id);
-                    setLignes(updatedLignes)
-                    Swal.fire("Saved!", "", "success");
-                    console.log(res)
-                })
-
-
-            } else if (result.isDenied) {
-                Swal.fire("Changes are not saved", "", "info");
-            }
-        });
-    }
-    async function changeStatus(id) {
-        const { value: status } = await Swal.fire({
-            title: "Select field validation",
-            input: "select",
-            inputOptions: {
-                pending: "pending",
-                in_progress: "in progress"
-            },
-            inputPlaceholder: "Select a status",
-            showCancelButton: true,
-            inputValidator: (value) => {
-                return new Promise((resolve) => {
-                    if (value) {
-                        resolve();
-                    }
-                });
-            }
-        });
-        if (status) {
-            //http://localhost:8000/technicien/update/3/
-            //TODO: here update the status in the backend integration
-            const token = localStorage.getItem('token');
-            console.log('Token:', token); // Check token value
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            };
-            const body = {
-                "status": status,  // Update the status
-            }
-            axios.put(`${baseUrl}/technicien/update/${id}/`, body, config).then((res) => {
-                Swal.fire(`You selected: ${status}`);
-                console.log(res)
-            })
-
-        }
-    }
-    function unconfirmLigne(id) {
-        Swal.fire({
-            title: "Do you want to mark this ligne as not valid?",
-            showDenyButton: true,
-            showCancelButton: true,
-            confirmButtonText: "save",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                getComment().then((res) => {
-                    if (res != "no comment") {
-                        const token = localStorage.getItem('token');
-                        console.log('Token:', token); // Check token value
-                        const config = {
-                            headers: {
-                                Authorization: `Bearer ${token}`
-                            }
-                        };
-                        const currentDate = new Date();
-
-                        // Get year, month, and day
-                        const year = currentDate.getFullYear();
-                        const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Month is zero-based
-                        const day = currentDate.getDate().toString().padStart(2, '0');
-
-                        // Format the date
-                        const formattedDate = `${year}-${month}-${day}`;
-
-                        const body = {
-                            "status": "completed",  // Update the status
-                            "realisation_date": formattedDate,  // Update the realization date
-                            "comment": res // Update the comment
-                        }
-                        axios.put(`${baseUrl}/technicien/update/${id}/`, body, config).then((res) => {
-                            const updatedLignes = lignes.filter(line => line.id !== id);
-                            setLignes(updatedLignes)
-                            Swal.fire("Saved!", "", "success");
-                            console.log(res)
-                        })
-
-                    } else {
-                        Swal.fire("You need to add comment ", "", "info");
-
-                    }
-
-
-                })
-            } else if (result.isDenied) {
-                Swal.fire("Changes are not saved", "", "info");
-            }
-        });
-    }
     const getAllLignes = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -185,7 +35,7 @@ export default function LigneAssigned() {
                     Authorization: `Bearer ${token}`
                 }
             };//http://localhost:8000/technicien/get/
-            const response = await axios.get(`${baseUrl}/technicien/get/`, config);
+            const response = await axios.get(`${baseUrl}/lignes/`, config);
             console.log(response)
             const filteredLignes = response.data.filter(ligne => ligne.status == 'completed');
             console.log('Filtered Lignes:', filteredLignes);
@@ -219,42 +69,32 @@ export default function LigneAssigned() {
                 <div class="table-container">
                     <table class="custom-table">
                         <colgroup>
-                            <col style={{ width: "5%" }} /> {/* ID */}
-                            <col style={{ width: "15%" }} /> {/* Titre de ligne */}
-                            <col style={{ width: "10%" }} /> {/* Date de Realisation prev */}
-                            <col style={{ width: "10%" }} /> {/* Date de creation */}
-                            <col style={{ width: "10%" }} /> {/* Edit */}
-                            <col style={{ width: "20%" }} /> {/* Assigné à */}
-                            <col style={{ width: "10%" }} /> {/* Supprimer */}
+                            <col style={{ width: "10%" }} /> {/* ID */}
+                            <col style={{ width: "20%" }} /> {/* Titre de ligne */}
+                            <col style={{ width: "20%" }} /> {/* Date de Realisation prev */}
+                            <col style={{ width: "20%" }} /> {/* Date de creation */}
+                            <col style={{ width: "20%" }} /> {/* Edit */}
                         </colgroup>
                         <thead>
                             <tr>
                                 <th scope="col">ID</th>
                                 <th scope="col">Titre de ligne</th>
-                                <th scope="col">Date de affectation </th>
+                                <th scope="col">Date de creation</th>
                                 <th scope="col">Status</th>
-                                <th scope="col">Validation status</th>
-                                <th scope="col">comment</th>
-                                <th scope="col"></th>
+                                <th scope="col">Semaine</th>
                             </tr>
                         </thead>
                         <tbody>
                             {
                                 lignes.map((ligne, index) => {
-
-
                                     return (
 
                                         <tr key={index} >
                                             <td>{ligne.id}</td>
-                                            <td>{ligne.ligne_title}</td>
-                                            <td>{new Date(ligne.affectation_date).toLocaleString()}</td>
+                                            <td>{ligne.title}</td>
+                                            <td>{new Date(ligne.datecreation).toLocaleDateString()}</td>
                                             <td>{ligne.status}</td>
-                                            <td> {ligne.confirmed ? "confirmed" : "not confirmed"}  </td>
-                                            <td style={{ fontWeight: "bold", cursor: 'pointer', fontSize: 13, color: "black" }} >{ligne.comment}</td>
-                                            {ligne.confirmed ? <GrValidate size={22} color='green' /> : <td><AiFillWarning size={22} color='red' /></td>}
-
-
+                                            <th>{ligne.sem}</th>
                                         </tr>)
 
                                 })

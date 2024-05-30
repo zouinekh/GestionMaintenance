@@ -211,6 +211,7 @@ function ligne() {
                     title: "Ligne assigned to test",
                     text: "Ligne assigned to test successfully",
                 });
+                
                 handleClose();
             } else {
                 Swal.fire({

@@ -183,8 +183,8 @@ export default function LigneTechnicien() {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
-            };//http://localhost:8000/technicien/get/
-            const response = await axios.get(`${baseUrl}/technicien/get/`, config);
+            };
+            const response = await axios.get(`${baseUrl}/lignes/`, config);
             console.log(response)
             const filteredLignes = response.data.filter(ligne => ligne.status != 'completed');
             console.log('Filtered Lignes:', filteredLignes);
