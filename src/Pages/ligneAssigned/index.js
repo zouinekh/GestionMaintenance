@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useRouter } from 'next/router';
 import { baseUrl } from 'utils/baseUrl';
 import styles from './ModalStyles.module.css';
+import technician from 'pages/technician';
 
 export default function LigneAssigned() {
     const [storedToken, setStoredToken] = useState('');
@@ -134,6 +135,7 @@ export default function LigneAssigned() {
         const banc_id = localStorage.getItem('banc_id');
         const ligne_test = localStorage.getItem('ligne_test');
         const banc_name = localStorage.getItem('banc_name');
+        const user = localStorage.getItem('id');
         const config = {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -155,7 +157,9 @@ export default function LigneAssigned() {
             "validated_by_technician": true,
             "validation_date": formattedDate,
             "comment": comment.comment,
-            "test":selectedTest.id
+            "test":selectedTest.id,
+            "role":1,
+            "technician":user
         };
         axios.put(`${baseUrl}/lignes/bancs/${banc_id}/`, body, config).then((res) => {
             setUpdateModal(false);
@@ -188,8 +192,6 @@ export default function LigneAssigned() {
             }
         });
     };
-
-    const getBancs = async (id) => { }
 
     useEffect(() => {
         if (typeof window !== 'undefined') {

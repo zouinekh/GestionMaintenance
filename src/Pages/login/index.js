@@ -21,6 +21,8 @@ const Login = () => {
         console.log("Login successful", response.data);
         localStorage.setItem('token', response.data.access_token);
         localStorage.setItem('user', JSON.stringify(response.data));
+        localStorage.setItem('id', response.data.id);
+        localStorage.setItem('role', response.data.role);
         console.log(response)
         if (response.data.role == 1) {
           window.location.href = "/admin"
