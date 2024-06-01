@@ -160,7 +160,7 @@ export default function LigneAssigned() {
         const body = {
             "ligne_test": ligne_test,
             "banc_name": banc_name,
-            "validated_by_technician": true,
+            "validated_by_validator": true,
             "validation_date": formattedDate,
             "comment": comment.comment,
             "test":selectedTest.id,
@@ -183,18 +183,7 @@ export default function LigneAssigned() {
             confirmButtonText: "Confirm",
         }).then((result) => {
             if (result.isConfirmed) {
-                Swal.fire({
-                    title: "Do you want to add a comment for this ligne",
-                    showDenyButton: true,
-                    showCancelButton: true,
-                    confirmButtonText: "Ajouter",
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        setUpdateModal(true);
-                    } else if (result.isDenied) {
-                        saveComment("", banc); // Pass banc object to saveComment function
-                    }
-                });
+                saveComment("", banc);
             }
         });
     };
@@ -356,14 +345,14 @@ export default function LigneAssigned() {
                                                                     //setUpdateModal(true);
                                                                 }}
                                                                 style={{
-                                                                    backgroundColor: 'blue',
+                                                                    backgroundColor: banc.validated_by_technician ? 'blue' : 'gray',
                                                                     color: 'white',
                                                                     padding: '5px 10px',
                                                                     borderRadius: '5px',
                                                                     border: 'none',
                                                                     cursor: 'pointer'
                                                                 }}
-                                                                disabled={banc.validated_by_technicien}
+                                                                disabled={!banc.validated_by_technician}
                                                             >
                                                                 Valider
                                                             </button>
