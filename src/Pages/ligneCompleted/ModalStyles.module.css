@@ -1,0 +1,63 @@
+/* ModalStyles.module.css */
+
+.modal-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 1400px;
+    max-height: 90%;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-heading {
+    font-size: 1.5em;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+/* Ensure you use a specific class name for the table */
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.custom-table th,
+.custom-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.custom-table th {
+    background-color: #f2f2f2;
+}
+
+.swal2-container {
+    z-index: 100000 !important; /* Adjust the z-index as needed */
+}

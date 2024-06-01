@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Swal from 'sweetalert2';
-import Modal from 'react-modal';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import { baseUrl } from 'utils/baseUrl';
 import styles from './ModalStyles.module.css';
 
-Modal.setAppElement('#__next'); // Ensure this line is included for accessibility
-
 export default function LigneAssigned() {
     const [storedToken, setStoredToken] = useState('');
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [selectedLigne, setSelectedLigne] = useState({});
+    const [selectedTest, setSelectedTest] = useState({});
     const [updateModal, setUpdateModal] = useState(false)
     const [tests, setTests] = useState([]);
     const [bancs, setBancs] = useState([]);
@@ -119,14 +117,13 @@ export default function LigneAssigned() {
 
             // Fetch all tests associated with these testIds
             const filteredTests = tests.filter((test) => testIds.includes(test.id));
-
-            for (const ligneTest of ligneTestsData) {
-                const bancsResponse = await axios.get(`${baseUrl}/lignes/banc/ligne-tests/${ligneTest.id}/`, config);
-                setFiltredBancs(bancsResponse.data);
-            }
-
             setFiltredTests(filteredTests);
-            setAssignModal(true);
+            // for (const ligneTest of ligneTestsData) {
+            //     const bancsResponse = await axios.get(`${baseUrl}/lignes/banc/ligne-tests/${ligneTest.id}/`, config);
+            //     setFiltredBancs(bancsResponse.data);
+            // }
+            // 
+            // setAssignModal(true);
         } catch (error) {
             console.error('Error fetching ligne tests, tests, and bancs:', error);
         }
@@ -145,19 +142,20 @@ export default function LigneAssigned() {
 
         const currentDate = new Date();
 
-                 // Get year, month, and day
-                 const year = currentDate.getFullYear();
-                 const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Month is zero-based
-                 const day = currentDate.getDate().toString().padStart(2, '0');
+        // Get year, month, and day
+        const year = currentDate.getFullYear();
+        const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Month is zero-based
+        const day = currentDate.getDate().toString().padStart(2, '0');
 
-                 // Format the date
-                 const formattedDate = `${year}-${month}-${day}`;
+        // Format the date
+        const formattedDate = `${year}-${month}-${day}`;
         const body = {
-            "ligne_test":ligne_test,
-            "banc_name":banc_name,
+            "ligne_test": ligne_test,
+            "banc_name": banc_name,
             "validated_by_technician": true,
             "validation_date": formattedDate,
-            "comment": comment.comment
+            "comment": comment.comment,
+            "test":selectedTest.id
         };
         axios.put(`${baseUrl}/lignes/bancs/${banc_id}/`, body, config).then((res) => {
             setUpdateModal(false);
@@ -166,7 +164,7 @@ export default function LigneAssigned() {
             console.error('Error saving comment:', error);
         });
     };
-    
+
 
     const validateBanc = async (banc) => {
         Swal.fire({
@@ -190,8 +188,8 @@ export default function LigneAssigned() {
             }
         });
     };
-    
 
+    const getBancs = async (id) => { }
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -235,6 +233,7 @@ export default function LigneAssigned() {
                                         <td onClick={() => {
                                             handleLigneClick(ligne.id);
                                             setAssignModal(true);
+                                            localStorage.setItem("ligne_id", ligne.id);
                                         }}>{ligne.title}</td>
                                         <td>{new Date(ligne.datecreation).toLocaleDateString()}</td>
                                         <td>{ligne.status}</td>
@@ -273,68 +272,75 @@ export default function LigneAssigned() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {Filtredtests.map((test, index) => (
-                                        <tr key={index}>
-                                            <td style={{ padding: '5px' }}>{test.name}</td>
-                                            <td style={{ padding: '5px' }}>
-                                                {/* Map through bancs array for each test */}
-                                                {Filtredbancs.map((banc, bIndex) => (
-                                                    <div key={bIndex} style={{ marginBottom: '5px' }}>{banc.banc_name}</div>
-                                                ))}
-                                            </td>
-                                            {/* Render relevant information for each banc */}
-                                            <td style={{ padding: '5px' }}>
-                                                {Filtredbancs.map((banc, bIndex) => (
-                                                    <div key={bIndex} style={{ marginBottom: '5px' }}>{banc.validation_date}</div>
-                                                ))}
-                                            </td>
-                                            <td style={{ padding: '5px' }}>
-                                                {Filtredbancs.map((banc, bIndex) => (
-                                                    <div key={bIndex} style={{ marginBottom: '5px' }}>{banc.validated_by_technician ? "validated" : "not validated"}</div>
-                                                ))}
-                                            </td>
-                                            <td style={{ padding: '5px' }}>
-                                                {Filtredbancs.map((banc, bIndex) => (
-                                                    <div key={bIndex} style={{ marginBottom: '5px' }}>{banc.comment || "Pas de commentaire"}</div>
-                                                ))}
-                                            </td>
-                                            <td style={{ textAlign: 'center' }}>
-                                                {Filtredbancs.map((banc, bIndex) => (
-                                                    <div key={bIndex} style={{ marginBottom: '5px' }}>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                localStorage.setItem("banc_id",banc.id)
-                                                                localStorage.setItem("banc_name",banc.banc_name)
-                                                                localStorage.setItem("ligne_test",banc.ligne_test)
-                                                                setAssignModal(false);
-                                                                validateBanc(banc);
-                                                                //setUpdateModal(true);
-                                                            }}
-                                                            style={{
-                                                                backgroundColor: 'blue',
-                                                                color: 'white',
-                                                                padding: '5px 10px',
-                                                                borderRadius: '5px',
-                                                                border: 'none',
-                                                                cursor: 'pointer'
-                                                            }}
-                                                            disabled={banc.validated_by_technicien}
-                                                        >
-                                                            Valider
-                                                        </button>
-                                                    </div>
-                                                ))}
+                                    {Filtredtests.map((test, index) => {
+                                        const filtredBancsForTest = bancs.filter(banc => banc.test === test.id);
+                                        console.log(test);
+                                        console.log(index);
+                                        console.log(filtredBancsForTest);
 
-                                            </td>
-
-                                        </tr>
-                                    ))}
-
-
+                                        return (
+                                            <tr key={index}>
+                                                <td style={{ padding: '5px' }}>{test.name}</td>
+                                                <td style={{ padding: '5px' }}>
+                                                    {filtredBancsForTest.map((banc, bIndex) => (
+                                                        <div key={bIndex} style={{ marginBottom: '5px' }}>{banc.banc_name}</div>
+                                                    ))}
+                                                </td>
+                                                {/* Render relevant information for each banc */}
+                                                <td style={{ padding: '5px' }}>
+                                                    {filtredBancsForTest.map((banc, bIndex) => (
+                                                        <div key={bIndex} style={{ marginBottom: '5px' }}>{banc.validation_date}</div>
+                                                    ))}
+                                                </td>
+                                                <td style={{ padding: '5px' }}>
+                                                    {filtredBancsForTest.map((banc, bIndex) => (
+                                                        <div key={bIndex} style={{ marginBottom: '5px' }}>{banc.validated_by_technician ? "validated" : "not validated"}</div>
+                                                    ))}
+                                                </td>
+                                                <td style={{ padding: '5px' }}>
+                                                    {filtredBancsForTest.map((banc, bIndex) => (
+                                                        <div key={bIndex} style={{ marginBottom: '5px' }}>{banc.comment || "Pas de commentaire"}</div>
+                                                    ))}
+                                                </td>
+                                                <td style={{ textAlign: 'center' }}>
+                                                    {/* Render buttons for each banc */}
+                                                    {filtredBancsForTest.map((banc, bIndex) => (
+                                                        <div key={bIndex} style={{ marginBottom: '5px' }}>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    localStorage.setItem("banc_id", banc.id)
+                                                                    localStorage.setItem("banc_name", banc.banc_name)
+                                                                    localStorage.setItem("ligne_test", banc.ligne_test)
+                                                                    setSelectedTest(test);
+                                                                    setAssignModal(false);
+                                                                    validateBanc(banc);
+                                                                    //setUpdateModal(true);
+                                                                }}
+                                                                style={{
+                                                                    backgroundColor: 'blue',
+                                                                    color: 'white',
+                                                                    padding: '5px 10px',
+                                                                    borderRadius: '5px',
+                                                                    border: 'none',
+                                                                    cursor: 'pointer'
+                                                                }}
+                                                                disabled={banc.validated_by_technicien}
+                                                            >
+                                                                Valider
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
+
                             </table>
                         </div>
                     </div>
+
+
                 </section>
             ) : null}
             {updateModal ? (

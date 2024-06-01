@@ -23,6 +23,7 @@ function Test() {
     const [lignes, setLignes] = useState([]);
     const [ligneTests, setLigneTests] = useState([]);
     const [tests, setTests] = useState([]);
+    const [Filtredligne, setFiltredligne] = useState([]);
 
     const onSubmit = async (data) => {
         let newTest = {
@@ -261,6 +262,7 @@ function Test() {
 
     const AddBanc = async (data) => {
         try {
+            const test = Number(localStorage.getItem('test'));
             // Find the corresponding ligneTest
             const ligneTest = ligneTests.find(lt => lt.test === selectedTest.id && lt.ligne === selectedLigne.id);
             if (!ligneTest) {
@@ -272,6 +274,7 @@ function Test() {
                 ligne_test: ligneTestId,
                 banc_name: data.banc_name,
                 validation_date: data.validation_date,
+                test:test
             };
     
             const response = await axios.post(`${baseUrl}/lignes/bancs/`, newBanc, {
@@ -286,7 +289,7 @@ function Test() {
                     title: "Banc created successfully",
                     text: "Banc created successfully"
                 });
-                window.location.reload();
+                //window.location.reload();
             } else {
                 throw new Error('Error creating banc');
             }
@@ -301,7 +304,36 @@ function Test() {
             setUpdateBanc(false);
         }
     };
+    const getAllLignesWithTest = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            };
+
+        const responseLigneTests = await axios.get(`${baseUrl}/lignes/ligne-tests/test/${id}/`, config);
+        const ligneTestsData = responseLigneTests.data;
+        console.log(ligneTestsData);
+
+        // Extract unique ligne IDs from ligneTestsData
+        const ligneIds = [...new Set(ligneTestsData.map(ligneTest => ligneTest.ligne))];
+        console.log(ligneIds);
+        // Fetch all lignes data
+        const responseLignes = await axios.get(`${baseUrl}/lignes/`, config);
+        const lignesData = responseLignes.data;
+        console.log(lignesData);
+        // Filter lignes based on the extracted ligne IDs
+        const filtredLignes = lignesData.filter(ligne => ligneIds.includes(ligne.id));
+        console.log(filtredLignes);
+        // Set the filtered lignes to state
+        setFiltredligne(filtredLignes);
+        } catch (error) {
+            console.error('Error fetching lignes:', error);
+        }
     
+    }
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -312,6 +344,10 @@ function Test() {
         getAllLignes();
         getAllLigneTests();
         getAllTests();
+        const filtered = lignes.filter(ligne =>
+            ligneTests.some(ligneTest => ligneTest.ligne === ligne.id)
+        );
+        setFiltredligne(filtered);
     }, []);
     return (
 
@@ -368,6 +404,8 @@ function Test() {
                                         if (checkIfLigneAssignedToTest(test.id)) {
                                             setSelectedTest(test);
                                             handleTestSelect(test);
+                                            localStorage.setItem("test", test.id);
+                                            getAllLignesWithTest(test.id);
                                             setUpdateBanc(true);
                                         } else {
                                             Swal.fire({
@@ -574,13 +612,11 @@ function Test() {
                                             />
                                         </label>
                                         <label>
-                                            <input
-                                                value={selectedLigne.title || ''}
-                                                placeholder=""
-                                                type="text"
-                                                className="input"
-                                                disabled
-                                            />
+                                            <select {...register("ligne", { required: true })} className="input">
+                                                {Filtredligne.map((ligne, key) => (
+                                                    <option key={key} value={ligne.id}>{ligne.title}</option>
+                                                ))}
+                                            </select>
                                         </label>
                                     </div>
                                     <label>
