@@ -24,7 +24,12 @@ function Test() {
     const [ligneTests, setLigneTests] = useState([]);
     const [tests, setTests] = useState([]);
     const [Filtredligne, setFiltredligne] = useState([]);
+    const [selectedLigneBanc, setSelectedLigneBancs] = useState({});
 
+    const setSelectedLigneBanc = (event) => {
+        const selectedLigneId = event.target.value;
+        setSelectedLigneBancs(selectedLigneId);
+      };
     const onSubmit = async (data) => {
         let newTest = {
             name: data.name
@@ -91,7 +96,6 @@ function Test() {
             handleClose();
         }
     };
-
     async function updateTest(data) {
         let newTest = {
             name: data.name,
@@ -262,9 +266,12 @@ function Test() {
 
     const AddBanc = async (data) => {
         try {
+            console.log('Selected Test ID:', selectedTest.id);
+            console.log('Selected Ligne ID for Banc:', selectedLigneBanc);
             const test = Number(localStorage.getItem('test'));
             // Find the corresponding ligneTest
-            const ligneTest = ligneTests.find(lt => lt.test === selectedTest.id && lt.ligne === selectedLigne.id);
+            const ligneTest = ligneTests.find(lt => lt.test === selectedTest.id && lt.ligne === Number(selectedLigneBanc));
+            console.log('Ligne Test for Banc:', ligneTest);
             if (!ligneTest) {
                 throw new Error('LigneTest not found for the selected test and ligne');
             }
@@ -612,7 +619,7 @@ function Test() {
                                             />
                                         </label>
                                         <label>
-                                            <select {...register("ligne", { required: true })} className="input">
+                                            <select {...register("ligne", { required: true })} className="input" onChange={setSelectedLigneBanc}>
                                                 {Filtredligne.map((ligne, key) => (
                                                     <option key={key} value={ligne.id}>{ligne.title}</option>
                                                 ))}

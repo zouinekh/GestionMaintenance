@@ -319,14 +319,14 @@ export default function LigneAssigned() {
                                                                     //setUpdateModal(true);
                                                                 }}
                                                                 style={{
-                                                                    backgroundColor: 'blue',
+                                                                    backgroundColor: !banc.validated_by_technician ? 'blue' : 'gray',
                                                                     color: 'white',
                                                                     padding: '5px 10px',
                                                                     borderRadius: '5px',
                                                                     border: 'none',
                                                                     cursor: 'pointer'
                                                                 }}
-                                                                disabled={banc.validated_by_technicien}
+                                                                disabled={banc.validated_by_technician}
                                                             >
                                                                 Valider
                                                             </button>

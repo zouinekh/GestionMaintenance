@@ -165,7 +165,7 @@ export default function LigneAssigned() {
             "comment": comment.comment,
             "test":selectedTest.id,
             "role":1,
-            "technician":user
+            "validator":user
         };
         axios.put(`${baseUrl}/lignes/bancs/${banc_id}/`, body, config).then((res) => {
             setUpdateModal(false);
